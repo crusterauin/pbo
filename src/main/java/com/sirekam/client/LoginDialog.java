@@ -17,9 +17,9 @@ public class LoginDialog extends JDialog {
 
     public LoginDialog(JFrame parent, String roleTitle) {
         super(parent, "Login - " + roleTitle, true);
-        setSize(400, 250);
+        setSize(450, 280);
         setLocationRelativeTo(parent);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         initComponents();
         SwingUtils.centerWindow(this);
     }
@@ -27,6 +27,7 @@ public class LoginDialog extends JDialog {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
 
+        // ===== HEADER =====
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(41, 128, 185));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 15, 20));
@@ -36,46 +37,94 @@ public class LoginDialog extends JDialog {
         headerPanel.add(headerLabel);
         add(headerPanel, BorderLayout.NORTH);
 
+        // ===== FORM =====
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
 
+        // Username
         gbc.gridx = 0;
         gbc.gridy = 0;
-        formPanel.add(new JLabel("Username:"), gbc);
+        JLabel userLabel = new JLabel("Username:");
+        userLabel.setFont(new Font("Arial", Font.PLAIN, 13));
+        formPanel.add(userLabel, gbc);
+
         gbc.gridx = 1;
         gbc.gridy = 0;
-        usernameField = new JTextField(15);
+        gbc.weightx = 1.0;
+        usernameField = new JTextField();
+        usernameField.setPreferredSize(new Dimension(250, 32));
+        usernameField.setMinimumSize(new Dimension(200, 32));
+        usernameField.setFont(new Font("Arial", Font.PLAIN, 13));
         formPanel.add(usernameField, gbc);
 
+        // Password
         gbc.gridx = 0;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Password:"), gbc);
+        gbc.weightx = 0;
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(new Font("Arial", Font.PLAIN, 13));
+        formPanel.add(passLabel, gbc);
+
         gbc.gridx = 1;
         gbc.gridy = 1;
-        passwordField = new JPasswordField(15);
+        gbc.weightx = 1.0;
+        passwordField = new JPasswordField();
+        passwordField.setPreferredSize(new Dimension(250, 32));
+        passwordField.setMinimumSize(new Dimension(200, 32));
+        passwordField.setFont(new Font("Arial", Font.PLAIN, 13));
         formPanel.add(passwordField, gbc);
 
         add(formPanel, BorderLayout.CENTER);
 
+        // ===== BUTTONS =====
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         loginButton = new JButton("Login");
         loginButton.setBackground(new Color(41, 128, 185));
         loginButton.setForeground(Color.WHITE);
+        loginButton.setFont(new Font("Arial", Font.BOLD, 13));
+        loginButton.setPreferredSize(new Dimension(100, 35));
         loginButton.addActionListener(e -> doLogin());
 
+        // ===== TOMBOL BATAL =====
         cancelButton = new JButton("Batal");
-        cancelButton.addActionListener(e -> dispose());
+        cancelButton.setFont(new Font("Arial", Font.PLAIN, 13));
+        cancelButton.setPreferredSize(new Dimension(100, 35));
+
+        // ============================================================
+        // SOLUSI: FORCE CLOSE
+        // ============================================================
+        cancelButton.addActionListener(e -> {
+            System.out.println("🔴 [DEBUG] Tombol Batal diklik!");
+            closeDialog(); // Panggil method khusus
+        });
 
         buttonPanel.add(loginButton);
         buttonPanel.add(cancelButton);
         add(buttonPanel, BorderLayout.SOUTH);
 
         getRootPane().setDefaultButton(loginButton);
+
+        // ESC Key
+        getRootPane().registerKeyboardAction(
+                e -> closeDialog(),
+                KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+    }
+
+    // ============================================================
+    // METHOD KHUSUS UNTUK MENUTUP DIALOG
+    // ============================================================
+    public void closeDialog() {
+        System.out.println("🔴 [DEBUG] closeDialog() dipanggil!");
+        setVisible(false);
+        dispose();
+        System.out.println("🔴 [DEBUG] Dialog sudah ditutup!");
     }
 
     private void doLogin() {
@@ -93,7 +142,7 @@ public class LoginDialog extends JDialog {
             if (user != null) {
                 loggedInUser = user;
                 loginSuccess = true;
-                dispose();
+                closeDialog();
             } else {
                 SwingUtils.showError(this, "Username atau password salah!");
                 passwordField.setText("");

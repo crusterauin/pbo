@@ -222,10 +222,19 @@ public class PetugasDashboardUI extends JPanel {
         simpanBtn.addActionListener(e -> simpanKunjungan());
         simpanBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
+        // ============ TOMBOL LIHAT RIWAYAT ============
+        JButton riwayatBtn = new JButton("📋 Riwayat");
+        riwayatBtn.setBackground(new Color(155, 89, 182));
+        riwayatBtn.setForeground(Color.WHITE);
+        riwayatBtn.addActionListener(e -> lihatRiwayat());
+        riwayatBtn.setFont(new Font("Arial", Font.BOLD, 12));
+        // ===============================================
+
         JButton resetBtn = new JButton("↺ Reset");
         resetBtn.addActionListener(e -> resetForm());
 
         btnPanel.add(simpanBtn);
+        btnPanel.add(riwayatBtn);  // <-- TAMBAHKAN
         btnPanel.add(resetBtn);
         formPanel.add(btnPanel, gbc);
 
@@ -234,16 +243,53 @@ public class PetugasDashboardUI extends JPanel {
         return panel;
     }
 
-    // ============================================================
-    // CHAT PANEL UNTUK PETUGAS (Kirim ke Dokter Siti id=2)
-    // ============================================================
     private JPanel createChatPanel() {
         return new ChatClientGUI(
                 currentUser,
                 JenisChat.PETUGAS_DOKTER,
-                2,  // Receiver ID = Dokter Siti (id=2)
+                2,
                 "Dokter"
         );
+    }
+
+    // ============================================================
+    // METHOD LIHAT RIWAYAT
+    // ============================================================
+    private void lihatRiwayat() {
+        if (selectedPasien == null) {
+            SwingUtils.showError(this, "Silakan pilih pasien terlebih dahulu!");
+            return;
+        }
+
+        // Cek apakah pasien memiliki riwayat kunjungan
+        try {
+            List<Kunjungan> list = kunjunganController.getByPasien(selectedPasien.getIdPasien());
+            if (list == null || list.isEmpty()) {
+                int response = JOptionPane.showConfirmDialog(
+                        this,
+                        "Pasien " + selectedPasien.getNama() + " belum memiliki riwayat kunjungan.\nApakah ingin membuat kunjungan baru?",
+                        "Tidak Ada Riwayat",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                );
+                if (response == JOptionPane.YES_OPTION) {
+                    // Fokus ke form kunjungan
+                    keluhanArea.requestFocus();
+                }
+                return;
+            }
+        } catch (Exception e) {
+            SwingUtils.showError(this, "Error cek riwayat: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        // Buka dialog riwayat
+        RiwayatKunjunganDialog dialog = new RiwayatKunjunganDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                selectedPasien
+        );
+        dialog.setVisible(true);
     }
 
     private void loadPasienData() {

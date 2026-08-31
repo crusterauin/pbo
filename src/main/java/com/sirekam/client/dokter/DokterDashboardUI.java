@@ -16,6 +16,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DokterDashboardUI extends JPanel {
@@ -233,10 +234,24 @@ public class DokterDashboardUI extends JPanel {
 
     private void loadData() {
         try {
-            List<Kunjungan> list = kunjunganController.getByDokter(idDokter);
+            // Ambil semua kunjungan untuk dokter ini
+            List<Kunjungan> semuaList = kunjunganController.getByDokter(idDokter);
+
+            // ============================================================
+            // FILTER: hanya tampilkan yang statusnya MENUNGGU atau DIPERIKSA
+            // ============================================================
+            List<Kunjungan> list = new ArrayList<>();
+            for (Kunjungan k : semuaList) {
+                if (k.getStatus() == StatusKunjungan.MENUNGGU ||
+                        k.getStatus() == StatusKunjungan.DIPERIKSA) {
+                    list.add(k);
+                }
+            }
+            // ============================================================
+
             updateTable(list);
             if (statusLabel != null) {
-                statusLabel.setText("Total pasien ditugaskan: " + list.size());
+                statusLabel.setText("Total pasien aktif: " + list.size());
             }
         } catch (Exception e) {
             SwingUtils.showError(this, "Error load data: " + e.getMessage());

@@ -11,10 +11,14 @@ public class ApotekerApp extends JFrame {
     private ApotekerDashboardUI dashboard;
 
     public ApotekerApp() {
-        LoginDialog loginDialog = new LoginDialog(null, "Apoteker");
+        // ============================================================
+        // TAMPILKAN LOGIN DULU
+        // ============================================================
+        LoginDialog loginDialog = new LoginDialog(this, "Apoteker");
         loginDialog.setVisible(true);
 
         if (!loginDialog.isLoginSuccess()) {
+            // Tutup aplikasi
             dispose();
             return;
         }
@@ -26,6 +30,9 @@ public class ApotekerApp extends JFrame {
             return;
         }
 
+        // ============================================================
+        // SETELAH LOGIN SUKSES, BARU INIT UI
+        // ============================================================
         initUI();
         setVisible(true);
     }

@@ -6,6 +6,9 @@ import com.sirekam.model.enums.StatusResep;
 import com.sirekam.controller.ResepController;
 import com.sirekam.controller.ObatController;
 import com.sirekam.controller.StrukController;
+import com.sirekam.controller.KunjunganController;
+import com.sirekam.controller.PasienController;
+import com.sirekam.controller.DokterController;
 import com.sirekam.util.SwingUtils;
 import com.sirekam.pattern.iterator.ResepIterator;
 import com.sirekam.pattern.strategy.RegulerBiayaStrategy;
@@ -19,6 +22,7 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ApotekerDashboardUI extends JPanel {
@@ -27,6 +31,9 @@ public class ApotekerDashboardUI extends JPanel {
     private ResepController resepController;
     private ObatController obatController;
     private StrukController strukController;
+    private KunjunganController kunjunganController;
+    private PasienController pasienController;
+    private DokterController dokterController;
 
     private JTable resepTable;
     private DefaultTableModel resepTableModel;
@@ -45,6 +52,9 @@ public class ApotekerDashboardUI extends JPanel {
         this.resepController = new ResepController();
         this.obatController = new ObatController();
         this.strukController = new StrukController();
+        this.kunjunganController = new KunjunganController();
+        this.pasienController = new PasienController();
+        this.dokterController = new DokterController();
 
         initComponents();
         loadData();
@@ -151,7 +161,7 @@ public class ApotekerDashboardUI extends JPanel {
         detailPanel.add(new JLabel("Detail Resep:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 0;
-        detailResepArea = new JTextArea(4, 20);
+        detailResepArea = new JTextArea(5, 20);
         detailResepArea.setEditable(false);
         detailResepArea.setBackground(new Color(240, 240, 240));
         detailResepArea.setLineWrap(true);
@@ -217,25 +227,43 @@ public class ApotekerDashboardUI extends JPanel {
         return rightPanel;
     }
 
-    // ============================================================
-    // CHAT PANEL UNTUK APOTEKER (Kirim ke Dokter Siti id=2)
-    // ============================================================
     private JPanel createChatPanel() {
         return new ChatClientGUI(
                 currentUser,
                 JenisChat.DOKTER_APOTEKER,
-                2,  // Receiver ID = Dokter Siti (id=2)
+                2,
                 "Dokter"
         );
     }
 
     private void loadData() {
         try {
-            List<Resep> list = resepController.getResepMenunggu();
+            List<Resep> list = new ArrayList<>();
+            list.addAll(resepController.getResepMenunggu());
+            list.addAll(resepController.getResepDiproses());
+
+            list.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+
             updateTable(list);
             if (statusLabel != null) {
-                statusLabel.setText("Total resep menunggu: " + list.size());
+                statusLabel.setText("Total resep aktif: " + list.size());
             }
+
+            if (selectedResep != null) {
+                boolean found = false;
+                for (Resep r : list) {
+                    if (r.getIdResep() == selectedResep.getIdResep()) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    selectedResep = null;
+                    detailResepArea.setText("");
+                    totalLabel.setText("Rp 0");
+                }
+            }
+
         } catch (Exception e) {
             SwingUtils.showError(this, "Error load data: " + e.getMessage());
             e.printStackTrace();
@@ -291,12 +319,24 @@ public class ApotekerDashboardUI extends JPanel {
             if (selectedResep != null) {
                 detailResepArea.setText("Pasien: " + selectedResep.getNamaPasien() + "\n" +
                         "Dokter: " + selectedResep.getNamaDokter() + "\n" +
-                        "Resep: " + selectedResep.getObatDanPerlakuan());
+                        "Resep: " + selectedResep.getObatDanPerlakuan() + "\n" +
+                        "Status: " + selectedResep.getStatusResep().getDisplayName());
                 hitungTotal();
             }
         } catch (Exception e) {
             SwingUtils.showError(this, "Error load detail: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void selectResepById(int idResep) {
+        for (int i = 0; i < resepTableModel.getRowCount(); i++) {
+            String resepId = (String) resepTableModel.getValueAt(i, 0);
+            int id = Integer.parseInt(resepId.replace("RES-", ""));
+            if (id == idResep) {
+                resepTable.setRowSelectionInterval(i, i);
+                break;
+            }
         }
     }
 
@@ -330,6 +370,8 @@ public class ApotekerDashboardUI extends JPanel {
             return;
         }
 
+        int idResep = selectedResep.getIdResep();
+
         Obat selectedObat = (Obat) obatCombo.getSelectedItem();
         if (selectedObat == null) {
             SwingUtils.showError(this, "Silakan pilih obat!");
@@ -355,28 +397,33 @@ public class ApotekerDashboardUI extends JPanel {
         }
 
         try {
-            boolean success = resepController.assignObat(
-                    selectedResep.getIdResep(),
-                    selectedObat.getIdObat(),
-                    jumlah
-            );
+            boolean success = resepController.assignObat(idResep, selectedObat.getIdObat(), jumlah);
 
             if (success) {
                 SwingUtils.showSuccess(this, "✅ Obat berhasil diassign!\n" +
                         "Obat: " + selectedObat.getNamaObat() + "\n" +
                         "Jumlah: " + jumlah);
 
-                resepController.updateStatus(selectedResep.getIdResep(), StatusResep.DIPROSES_APOTEKER);
+                resepController.updateStatus(idResep, StatusResep.DIPROSES_APOTEKER);
 
-                jumlahField.setText("");
+                // JANGAN HAPUS JUMLAH FIELD - biarkan user bisa menambah lagi
+                // jumlahField.setText("");
+
                 loadData();
                 loadObat();
+
+                selectedResep = resepController.getById(idResep);
                 hitungTotal();
 
-                resepTable.clearSelection();
-                selectedResep = null;
-                detailResepArea.setText("");
-                totalLabel.setText("Rp 0");
+                if (selectedResep != null) {
+                    detailResepArea.setText("Pasien: " + selectedResep.getNamaPasien() + "\n" +
+                            "Dokter: " + selectedResep.getNamaDokter() + "\n" +
+                            "Resep: " + selectedResep.getObatDanPerlakuan() + "\n" +
+                            "Status: " + selectedResep.getStatusResep().getDisplayName());
+                }
+
+                selectResepById(idResep);
+
             } else {
                 SwingUtils.showError(this, "❌ Stok tidak mencukupi!\n" +
                         "Stok tersedia: " + selectedObat.getStok());
@@ -398,12 +445,26 @@ public class ApotekerDashboardUI extends JPanel {
             Struk struk = strukController.cetakStruk(selectedResep.getIdResep(), biayaKonsultasi);
 
             if (struk != null) {
+                Kunjungan kunjungan = kunjunganController.getById(selectedResep.getIdKunjungan());
+                if (kunjungan != null) {
+                    Pasien pasien = pasienController.cariById(kunjungan.getIdPasien());
+                    if (pasien != null) {
+                        struk.setNamaPasien(pasien.getNama());
+                        struk.setNoRekamMedis(pasien.getIdPasien());
+                        struk.setJenisAsuransi(pasien.getJenisAsuransi());
+                    }
+                    Dokter dokter = dokterController.findById(kunjungan.getIdDokter());
+                    if (dokter != null) {
+                        struk.setNamaDokter(dokter.getNamaDokter());
+                    }
+                }
+
                 String strukText = strukController.generateStrukText(struk);
                 JTextArea textArea = new JTextArea(strukText);
                 textArea.setEditable(false);
                 textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
                 JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(400, 400));
+                scrollPane.setPreferredSize(new Dimension(500, 500));
 
                 int option = JOptionPane.showConfirmDialog(
                         this,
@@ -422,6 +483,7 @@ public class ApotekerDashboardUI extends JPanel {
                     detailResepArea.setText("");
                     totalLabel.setText("Rp 0");
                     resepTable.clearSelection();
+                    jumlahField.setText("");
                 }
             } else {
                 SwingUtils.showError(this, "Gagal mencetak struk!");

@@ -37,6 +37,10 @@ public class ResepController extends GenericController<Resep> {
         return resepDAO.getResepMenunggu();
     }
 
+    public List<Resep> getResepDiproses() throws SQLException {
+        return resepDAO.getResepDiproses();
+    }
+
     public List<Resep> getByDokter(int idDokter) throws SQLException {
         return resepDAO.findByDokter(idDokter);
     }

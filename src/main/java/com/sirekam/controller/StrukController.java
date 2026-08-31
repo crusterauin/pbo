@@ -12,6 +12,8 @@ import com.sirekam.model.enums.StatusResep;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
+import com.sirekam.dao.ResepDetailDAO;
+import com.sirekam.model.ResepDetail;
 
 public class StrukController extends GenericController<Struk> {
 
@@ -115,7 +117,7 @@ public class StrukController extends GenericController<Struk> {
         return struk;
     }
 
-    public String generateStrukText(Struk struk) {
+    public String generateStrukText(Struk struk) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("========================================\n");
         sb.append("      KLINIK SEHAT SEJAHTERA\n");
@@ -123,6 +125,50 @@ public class StrukController extends GenericController<Struk> {
         sb.append("STRUK PEMBAYARAN\n");
         sb.append("No. Struk : STR-").append(String.format("%04d", struk.getIdStruk())).append("\n");
         sb.append("Tanggal  : ").append(struk.getWaktuCetak()).append("\n");
+
+        // Informasi Pasien
+        if (struk.getNamaPasien() != null) {
+            sb.append("Pasien   : ").append(struk.getNamaPasien()).append("\n");
+        }
+        if (struk.getNoRekamMedis() != null) {
+            sb.append("No. RM   : ").append(struk.getNoRekamMedis()).append("\n");
+        }
+        if (struk.getNamaDokter() != null) {
+            sb.append("Dokter   : ").append(struk.getNamaDokter()).append("\n");
+        }
+        if (struk.getJenisAsuransi() != null) {
+            sb.append("Asuransi : ").append(struk.getJenisAsuransi()).append("\n");
+        }
+
+        sb.append("----------------------------------------\n");
+
+        // ============================================================
+        // RINCIAN OBAT
+        // ============================================================
+        sb.append("RINCIAN OBAT:\n");
+
+        ResepDetailDAO resepDetailDAO = new ResepDetailDAO();
+        List<ResepDetail> detailObat = resepDetailDAO.findByResep(struk.getIdResep());
+
+        if (detailObat != null && !detailObat.isEmpty()) {
+            int no = 1;
+            for (ResepDetail rd : detailObat) {
+                String namaObat = rd.getNamaObat() != null ? rd.getNamaObat() : "Obat ID: " + rd.getIdObat();
+                String satuan = rd.getSatuan() != null ? rd.getSatuan() : "";
+                BigDecimal harga = rd.getHargaSatuan() != null ? rd.getHargaSatuan() : BigDecimal.ZERO;
+                int jumlah = rd.getJumlah();
+                BigDecimal subtotal = harga.multiply(BigDecimal.valueOf(jumlah));
+
+                sb.append(String.format("  %d. %s\n", no, namaObat));
+                sb.append(String.format("     %d %s x Rp %,.0f = Rp %,.0f\n",
+                        jumlah, satuan, harga, subtotal));
+                no++;
+            }
+        } else {
+            sb.append("  (Tidak ada detail obat)\n");
+        }
+        // ============================================================
+
         sb.append("----------------------------------------\n");
         sb.append("Biaya Konsultasi : Rp ").append(struk.getBiayaKonsultasi()).append("\n");
         sb.append("Biaya Obat       : Rp ").append(struk.getBiayaObat()).append("\n");

@@ -113,6 +113,7 @@ public class KunjunganDAO implements GenericDAO<Kunjungan> {
                 "JOIN tb_pasien p ON k.id_pasien = p.id_pasien " +
                 "JOIN tb_dokter d ON k.id_dokter = d.id_dokter " +
                 "WHERE k.id_dokter = ? " +
+                "AND k.status IN ('menunggu', 'diperiksa') " +
                 "ORDER BY k.tanggal_kunjungan DESC";
         ResultSet rs = dbManager.executeQuery(sql, idDokter);
         while (rs.next()) {

@@ -22,6 +22,7 @@ public class SwingUtils {
     }
 
     public static void centerWindow(Window window) {
+        if (window == null) return;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - window.getWidth()) / 2;
         int y = (screenSize.height - window.getHeight()) / 2;

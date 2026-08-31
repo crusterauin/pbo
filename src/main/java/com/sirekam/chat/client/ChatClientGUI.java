@@ -2,15 +2,18 @@ package com.sirekam.chat.client;
 
 import com.sirekam.model.ChatMessage;
 import com.sirekam.model.User;
+import com.sirekam.model.Dokter;
 import com.sirekam.model.enums.JenisChat;
 import com.sirekam.model.enums.StatusBaca;
 import com.sirekam.controller.ChatController;
+import com.sirekam.controller.DokterController;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChatClientGUI extends JPanel {
@@ -18,11 +21,19 @@ public class ChatClientGUI extends JPanel {
     private User currentUser;
     private ChatClient chatClient;
     private ChatController chatController;
+    private DokterController dokterController;
 
     private JPanel chatHistoryPanel;
     private JTextField messageField;
     private JButton sendButton;
     private JLabel statusLabel;
+
+    // ============================================================
+    // TAMBAHKAN DROPDOWN UNTUK PILIH DOKTER
+    // ============================================================
+    private JComboBox<Dokter> dokterCombo;
+    private JLabel partnerLabel;
+    // ============================================================
 
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     private Timer pollingTimer;
@@ -32,25 +43,27 @@ public class ChatClientGUI extends JPanel {
     private JenisChat jenisChat;
     private String partnerName;
 
+    // Untuk Petugas dan Apoteker: daftar dokter yang bisa dipilih
+    private List<Dokter> daftarDokter = new ArrayList<>();
+
     public ChatClientGUI(User user, JenisChat jenisChat, int receiverId, String partnerName) {
         this.currentUser = user;
         this.jenisChat = jenisChat;
         this.receiverId = receiverId;
         this.partnerName = partnerName;
         this.chatController = new ChatController();
+        this.dokterController = new DokterController();
         this.chatClient = ChatClient.getInstance();
         this.chatClient.setGUI(this);
 
         initComponents();
+        loadDokterList();
 
-        // Coba koneksi ke chat server
         if (!chatClient.connect("127.0.0.1", 6789, user)) {
             useSocket = false;
             startPolling();
-            JOptionPane.showMessageDialog(this,
-                    "Chat server tidak tersedia. Menggunakan mode polling.",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE);
+            statusLabel.setText("🔴 Offline (polling)");
+            statusLabel.setForeground(Color.RED);
         }
 
         loadChatHistory();
@@ -62,13 +75,42 @@ public class ChatClientGUI extends JPanel {
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // ============ TOP PANEL ============
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createTitledBorder("💬 Chat dengan " + partnerName));
+        JPanel topPanel = new JPanel(new BorderLayout(5, 5));
+        topPanel.setBorder(BorderFactory.createTitledBorder("💬 Chat Settings"));
 
-        JLabel partnerLabel = new JLabel("Partner: " + partnerName);
-        partnerLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        topPanel.add(partnerLabel, BorderLayout.WEST);
+        // ============================================================
+        // PANEL KIRI: Partner Name + Dropdown Dokter
+        // ============================================================
+        JPanel leftTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
+        partnerLabel = new JLabel("Partner: " + partnerName);
+        partnerLabel.setFont(new Font("Arial", Font.BOLD, 13));
+        leftTopPanel.add(partnerLabel);
+
+        // ============================================================
+        // DROPDOWN UNTUK PILIH DOKTER (Tampil jika role = petugas atau apoteker)
+        // ============================================================
+        String role = currentUser.getRole().getValue();
+        if (role.equals("pendaftaran") || role.equals("apoteker")) {
+            dokterCombo = new JComboBox<>();
+            dokterCombo.setPreferredSize(new Dimension(200, 25));
+            dokterCombo.addActionListener(e -> {
+                Dokter selected = (Dokter) dokterCombo.getSelectedItem();
+                if (selected != null) {
+                    receiverId = selected.getIdUser(); // ID user dari dokter
+                    partnerName = selected.getNamaDokter();
+                    partnerLabel.setText("Partner: " + partnerName);
+                    loadChatHistory();
+                }
+            });
+            leftTopPanel.add(new JLabel("Pilih Dokter:"));
+            leftTopPanel.add(dokterCombo);
+        }
+        // ============================================================
+
+        topPanel.add(leftTopPanel, BorderLayout.WEST);
+
+        // Status
         statusLabel = new JLabel("🟢 Online");
         statusLabel.setForeground(Color.GREEN);
         topPanel.add(statusLabel, BorderLayout.EAST);
@@ -110,6 +152,33 @@ public class ChatClientGUI extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
+    // ============================================================
+    // LOAD DAFTAR DOKTER DARI DATABASE
+    // ============================================================
+    private void loadDokterList() {
+        String role = currentUser.getRole().getValue();
+        if (!role.equals("pendaftaran") && !role.equals("apoteker")) {
+            return; // Hanya petugas dan apoteker yang butuh pilih dokter
+        }
+
+        try {
+            daftarDokter = dokterController.getAllDokter();
+            dokterCombo.removeAllItems();
+            for (Dokter d : daftarDokter) {
+                dokterCombo.addItem(d);
+            }
+            // Pilih dokter pertama sebagai default
+            if (!daftarDokter.isEmpty()) {
+                Dokter first = daftarDokter.get(0);
+                receiverId = first.getIdUser();
+                partnerName = first.getNamaDokter();
+                partnerLabel.setText("Partner: " + partnerName);
+            }
+        } catch (Exception e) {
+            System.err.println("Error load dokter: " + e.getMessage());
+        }
+    }
+
     private void loadChatHistory() {
         try {
             List<ChatMessage> messages = chatController.getPesanByPengirim(currentUser.getIdUser());
@@ -124,6 +193,7 @@ public class ChatClientGUI extends JPanel {
             }
 
             messages.addAll(received);
+            // Filter hanya untuk receiverId yang dipilih
             messages.removeIf(m -> (m.getIdPengirim() != receiverId && m.getIdPenerima() != receiverId));
             messages.sort((a, b) -> a.getWaktuKirim().compareTo(b.getWaktuKirim()));
 
@@ -231,7 +301,7 @@ public class ChatClientGUI extends JPanel {
 
         if (receiverId == 0) {
             JOptionPane.showMessageDialog(this,
-                    "Tidak ada penerima!",
+                    "Silakan pilih dokter terlebih dahulu!",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;

@@ -11,18 +11,19 @@ public class PetugasApp extends JFrame {
     private PetugasDashboardUI dashboard;
 
     public PetugasApp() {
-        LoginDialog loginDialog = new LoginDialog(null, "Petugas");
+        LoginDialog loginDialog = new LoginDialog(this, "Petugas");
         loginDialog.setVisible(true);
 
         if (!loginDialog.isLoginSuccess()) {
-            dispose();
+            // Tutup aplikasi
+            this.dispose();
             return;
         }
 
         currentUser = loginDialog.getLoggedInUser();
         if (!currentUser.getRole().getValue().equals("pendaftaran")) {
             SwingUtils.showError(this, "Anda tidak memiliki akses ke aplikasi Petugas!");
-            dispose();
+            this.dispose();
             return;
         }
 

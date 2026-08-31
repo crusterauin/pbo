@@ -11,10 +11,14 @@ public class DokterApp extends JFrame {
     private DokterDashboardUI dashboard;
 
     public DokterApp() {
-        LoginDialog loginDialog = new LoginDialog(null, "Dokter");
+        // ============================================================
+        // TAMPILKAN LOGIN DULU
+        // ============================================================
+        LoginDialog loginDialog = new LoginDialog(this, "Dokter");
         loginDialog.setVisible(true);
 
         if (!loginDialog.isLoginSuccess()) {
+            // Tutup aplikasi
             dispose();
             return;
         }
@@ -26,6 +30,9 @@ public class DokterApp extends JFrame {
             return;
         }
 
+        // ============================================================
+        // SETELAH LOGIN SUKSES, BARU INIT UI
+        // ============================================================
         initUI();
         setVisible(true);
     }
