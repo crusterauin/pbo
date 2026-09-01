@@ -179,4 +179,8 @@ public class StrukController extends GenericController<Struk> {
         sb.append("========================================\n");
         return sb.toString();
     }
+
+    public List<Object[]> getRiwayatTransaksi() throws SQLException {
+        return strukDAO.getRiwayatTransaksi();
+    }
 }

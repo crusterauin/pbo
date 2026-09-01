@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +90,7 @@ public class ApotekerDashboardUI extends JPanel {
         JPanel leftPanel = createLeftPanel();
         JTabbedPane leftTabbedPane = new JTabbedPane();
         leftTabbedPane.addTab("📋 Resep Masuk", leftPanel);
+        leftTabbedPane.addTab("📋 Riwayat Transaksi", createRiwayatPanel());
         leftTabbedPane.addTab("💬 Chat", createChatPanel());
         splitPane.setLeftComponent(leftTabbedPane);
 
@@ -492,5 +494,93 @@ public class ApotekerDashboardUI extends JPanel {
             SwingUtils.showError(this, "Error: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private JPanel createRiwayatPanel() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("📋 Riwayat Transaksi Obat"));
+        panel.setBackground(Color.WHITE);
+
+        // ============================================================
+        // TABEL RIWAYAT
+        // ============================================================
+        String[] columns = {"No", "Nama Pasien", "Obat", "Kuantitas", "Tanggal"};
+        DefaultTableModel riwayatTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable riwayatTable = new JTable(riwayatTableModel);
+        riwayatTable.setRowHeight(30);
+        riwayatTable.getColumnModel().getColumn(0).setMaxWidth(50);
+        riwayatTable.getColumnModel().getColumn(3).setMaxWidth(80);
+
+        JScrollPane scrollPane = new JScrollPane(riwayatTable);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // ============================================================
+        // LOAD DATA
+        // ============================================================
+        try {
+            List<Object[]> list = strukController.getRiwayatTransaksi();
+            int no = 1;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            for (Object[] row : list) {
+                riwayatTableModel.addRow(new Object[]{
+                        no++,
+                        row[0], // nama_pasien
+                        row[1], // nama_obat
+                        row[2], // kuantitas
+                        row[3] != null ? ((LocalDateTime) row[3]).format(formatter) : "-"
+                });
+            }
+
+            // Tambahkan label total
+            JLabel totalLabel = new JLabel("Total transaksi: " + list.size());
+            totalLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+            panel.add(totalLabel, BorderLayout.SOUTH);
+
+        } catch (Exception e) {
+            SwingUtils.showError(this, "Error load riwayat: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // ============================================================
+        // TOMBOL REFRESH
+        // ============================================================
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton refreshBtn = new JButton("🔄 Refresh");
+        refreshBtn.addActionListener(e -> {
+            riwayatTableModel.setRowCount(0);
+            try {
+                List<Object[]> list = strukController.getRiwayatTransaksi();
+                int no = 1;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                for (Object[] row : list) {
+                    riwayatTableModel.addRow(new Object[]{
+                            no++,
+                            row[0],
+                            row[1],
+                            row[2],
+                            row[3] != null ? ((LocalDateTime) row[3]).format(formatter) : "-"
+                    });
+                }
+                // Update total
+                Component[] comps = panel.getComponents();
+                for (Component c : comps) {
+                    if (c instanceof JLabel && ((JLabel) c).getText().startsWith("Total transaksi:")) {
+                        ((JLabel) c).setText("Total transaksi: " + list.size());
+                    }
+                }
+            } catch (Exception ex) {
+                SwingUtils.showError(panel, "Error refresh: " + ex.getMessage());
+            }
+        });
+        btnPanel.add(refreshBtn);
+        panel.add(btnPanel, BorderLayout.NORTH);
+
+        return panel;
     }
 }

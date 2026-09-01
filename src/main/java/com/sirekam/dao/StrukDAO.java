@@ -154,4 +154,30 @@ public class StrukDAO implements GenericDAO<Struk> {
         int result = dbManager.executeUpdate(sql, idKunjungan);
         return result > 0;
     }
+
+    public List<Object[]> getRiwayatTransaksi() throws SQLException {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT " +
+                "p.nama AS nama_pasien, " +
+                "o.nama_obat, " +
+                "rd.jumlah AS kuantitas, " +
+                "s.waktu_cetak AS tanggal_transaksi " +
+                "FROM tb_struk s " +
+                "JOIN tb_resep r ON s.id_resep = r.id_resep " +
+                "JOIN tb_kunjungan k ON r.id_kunjungan = k.id_kunjungan " +
+                "JOIN tb_pasien p ON k.id_pasien = p.id_pasien " +
+                "JOIN tb_resep_detail rd ON rd.id_resep = r.id_resep " +
+                "JOIN tb_obat o ON rd.id_obat = o.id_obat " +
+                "ORDER BY s.waktu_cetak DESC";
+        ResultSet rs = dbManager.executeQuery(sql);
+        while (rs.next()) {
+            Object[] row = new Object[4];
+            row[0] = rs.getString("nama_pasien");
+            row[1] = rs.getString("nama_obat");
+            row[2] = rs.getInt("kuantitas");
+            row[3] = rs.getTimestamp("tanggal_transaksi").toLocalDateTime();
+            list.add(row);
+        }
+        return list;
+    }
 }
