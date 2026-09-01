@@ -44,7 +44,10 @@ public class ApotekerDashboardUI extends JPanel {
     private JComboBox<Obat> obatCombo;
     private JTextField jumlahField;
     private JLabel totalLabel;
-    private JComboBox<String> strategiCombo;
+    private JTable detailTable;
+    private DefaultTableModel detailTableModel;
+    private JLabel subTotalLabel;
+    private JLabel totalKeseluruhanLabel;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -158,12 +161,15 @@ public class ApotekerDashboardUI extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(3, 5, 3, 5);
 
+        // ============================================================
+        // DETAIL RESEP (INFO)
+        // ============================================================
         gbc.gridx = 0;
         gbc.gridy = 0;
         detailPanel.add(new JLabel("Detail Resep:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 0;
-        detailResepArea = new JTextArea(5, 20);
+        detailResepArea = new JTextArea(3, 20);
         detailResepArea.setEditable(false);
         detailResepArea.setBackground(new Color(240, 240, 240));
         detailResepArea.setLineWrap(true);
@@ -171,52 +177,111 @@ public class ApotekerDashboardUI extends JPanel {
         JScrollPane resepScroll = new JScrollPane(detailResepArea);
         detailPanel.add(resepScroll, gbc);
 
+        // ============================================================
+        // TABEL OBAT YANG SUDAH DIASSIGN
+        // ============================================================
         gbc.gridx = 0;
         gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        detailPanel.add(new JLabel("📋 Obat yang sudah diassign:"), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        String[] detailColumns = {"ID", "Obat", "Jumlah", "Harga", "Subtotal"};
+        detailTableModel = new DefaultTableModel(detailColumns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        detailTable = new JTable(detailTableModel);
+        detailTable.setRowHeight(30);
+        detailTable.getColumnModel().getColumn(0).setMaxWidth(50);
+        detailTable.getColumnModel().getColumn(3).setMaxWidth(80);
+        detailTable.getColumnModel().getColumn(4).setMaxWidth(100);
+        JScrollPane detailScroll = new JScrollPane(detailTable);
+        detailScroll.setPreferredSize(new Dimension(0, 120));
+        detailPanel.add(detailScroll, gbc);
+
+        // ============================================================
+        // SUBTOTAL & TOTAL
+        // ============================================================
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        detailPanel.add(new JLabel("Subtotal Obat:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        subTotalLabel = new JLabel("Rp 0");
+        subTotalLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        subTotalLabel.setForeground(new Color(46, 204, 113));
+        detailPanel.add(subTotalLabel, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        totalKeseluruhanLabel = new JLabel("Total Bayar:");  // label
+        detailPanel.add(totalKeseluruhanLabel, gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        totalLabel = new JLabel("Rp 0");
+        totalLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        totalLabel.setForeground(new Color(46, 204, 113));
+        detailPanel.add(totalLabel, gbc);
+
+        // ============================================================
+        // FORM TAMBAH OBAT
+        // ============================================================
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 1;
         detailPanel.add(new JLabel("Pilih Obat:"), gbc);
         gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = 5;
         obatCombo = new JComboBox<>();
         obatCombo.setPreferredSize(new Dimension(200, 30));
         detailPanel.add(obatCombo, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 6;
         detailPanel.add(new JLabel("Jumlah:"), gbc);
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 6;
         jumlahField = new JTextField(10);
         detailPanel.add(jumlahField, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 7;
         JButton assignBtn = new JButton("💾 Assign Obat");
         assignBtn.setBackground(new Color(41, 128, 185));
         assignBtn.setForeground(Color.WHITE);
         assignBtn.addActionListener(e -> assignObat());
         detailPanel.add(assignBtn, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        detailPanel.add(new JLabel("Strategi Biaya:"), gbc);
+        // ============================================================
+        // TOMBOL EDIT & DELETE
+        // ============================================================
         gbc.gridx = 1;
-        gbc.gridy = 4;
-        strategiCombo = new JComboBox<>(new String[]{"Reguler", "BPJS (Diskon 30%)", "Asuransi (Diskon 20%)"});
-        strategiCombo.addActionListener(e -> hitungTotal());
-        detailPanel.add(strategiCombo, gbc);
+        gbc.gridy = 8;
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        btnPanel.setBackground(Color.WHITE);
 
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        detailPanel.add(new JLabel("Total Bayar:"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 5;
-        totalLabel = new JLabel("Rp 0");
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        totalLabel.setForeground(new Color(46, 204, 113));
-        detailPanel.add(totalLabel, gbc);
+        JButton editBtn = new JButton("✏️ Edit Jumlah");
+        editBtn.setBackground(new Color(241, 196, 15));
+        editBtn.setForeground(Color.WHITE);
+        editBtn.addActionListener(e -> editJumlah());
+
+        JButton deleteBtn = new JButton("🗑️ Hapus");
+        deleteBtn.setBackground(new Color(231, 76, 60));
+        deleteBtn.setForeground(Color.WHITE);
+        deleteBtn.addActionListener(e -> hapusItem());
+
+        btnPanel.add(editBtn);
+        btnPanel.add(deleteBtn);
+        detailPanel.add(btnPanel, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 6;
+        gbc.gridy = 10;
         JButton cetakBtn = new JButton("🧾 Cetak Struk");
         cetakBtn.setBackground(new Color(46, 204, 113));
         cetakBtn.setForeground(Color.WHITE);
@@ -311,6 +376,8 @@ public class ApotekerDashboardUI extends JPanel {
             selectedResep = null;
             detailResepArea.setText("");
             totalLabel.setText("Rp 0");
+            detailTableModel.setRowCount(0);
+            subTotalLabel.setText("Rp 0");
             return;
         }
 
@@ -319,11 +386,7 @@ public class ApotekerDashboardUI extends JPanel {
             int id = Integer.parseInt(resepId.replace("RES-", ""));
             selectedResep = resepController.getById(id);
             if (selectedResep != null) {
-                detailResepArea.setText("Pasien: " + selectedResep.getNamaPasien() + "\n" +
-                        "Dokter: " + selectedResep.getNamaDokter() + "\n" +
-                        "Resep: " + selectedResep.getObatDanPerlakuan() + "\n" +
-                        "Status: " + selectedResep.getStatusResep().getDisplayName());
-                hitungTotal();
+                refreshDetailTable();
             }
         } catch (Exception e) {
             SwingUtils.showError(this, "Error load detail: " + e.getMessage());
@@ -349,13 +412,20 @@ public class ApotekerDashboardUI extends JPanel {
         }
 
         try {
-            String selected = (String) strategiCombo.getSelectedItem();
-            if (selected.equals("BPJS (Diskon 30%)")) {
-                strukController.setStrategy(new BPJSBiayaStrategy());
-            } else if (selected.equals("Asuransi (Diskon 20%)")) {
-                strukController.setStrategy(new AsuransiBiayaStrategy());
-            } else {
-                strukController.setStrategy(new RegulerBiayaStrategy());
+            // Ambil data pasien dari kunjungan
+            Kunjungan kunjungan = kunjunganController.getById(selectedResep.getIdKunjungan());
+            if (kunjungan != null) {
+                Pasien pasien = pasienController.cariById(kunjungan.getIdPasien());
+                if (pasien != null) {
+                    // Pilih strategy berdasarkan jenis asuransi pasien
+                    if (pasien.isBPJS()) {
+                        strukController.setStrategy(new BPJSBiayaStrategy());
+                    } else if (pasien.isAsuransi()) {
+                        strukController.setStrategy(new AsuransiBiayaStrategy());
+                    } else {
+                        strukController.setStrategy(new RegulerBiayaStrategy());
+                    }
+                }
             }
 
             BigDecimal total = strukController.hitungTotalBayar(selectedResep.getIdResep());
@@ -408,22 +478,16 @@ public class ApotekerDashboardUI extends JPanel {
 
                 resepController.updateStatus(idResep, StatusResep.DIPROSES_APOTEKER);
 
-                // JANGAN HAPUS JUMLAH FIELD - biarkan user bisa menambah lagi
-                // jumlahField.setText("");
-
+                // ============================================================
+                // REFRESH DETAIL TABLE (LIVE)
+                // ============================================================
+                refreshDetailTable();
                 loadData();
                 loadObat();
 
-                selectedResep = resepController.getById(idResep);
-                hitungTotal();
-
-                if (selectedResep != null) {
-                    detailResepArea.setText("Pasien: " + selectedResep.getNamaPasien() + "\n" +
-                            "Dokter: " + selectedResep.getNamaDokter() + "\n" +
-                            "Resep: " + selectedResep.getObatDanPerlakuan() + "\n" +
-                            "Status: " + selectedResep.getStatusResep().getDisplayName());
-                }
-
+                // Reset pilihan
+                resepTable.clearSelection();
+                // Re-select resep yang sama
                 selectResepById(idResep);
 
             } else {
@@ -443,11 +507,27 @@ public class ApotekerDashboardUI extends JPanel {
         }
 
         try {
+            // ============================================================
+            // AUTO SELECT STRATEGY BERDASARKAN PASIEN
+            // ============================================================
+            Kunjungan kunjungan = kunjunganController.getById(selectedResep.getIdKunjungan());
+            if (kunjungan != null) {
+                Pasien pasien = pasienController.cariById(kunjungan.getIdPasien());
+                if (pasien != null) {
+                    if (pasien.isBPJS()) {
+                        strukController.setStrategy(new BPJSBiayaStrategy());
+                    } else if (pasien.isAsuransi()) {
+                        strukController.setStrategy(new AsuransiBiayaStrategy());
+                    } else {
+                        strukController.setStrategy(new RegulerBiayaStrategy());
+                    }
+                }
+            }
+
             BigDecimal biayaKonsultasi = new BigDecimal("100000");
             Struk struk = strukController.cetakStruk(selectedResep.getIdResep(), biayaKonsultasi);
 
             if (struk != null) {
-                Kunjungan kunjungan = kunjunganController.getById(selectedResep.getIdKunjungan());
                 if (kunjungan != null) {
                     Pasien pasien = pasienController.cariById(kunjungan.getIdPasien());
                     if (pasien != null) {
@@ -502,85 +582,272 @@ public class ApotekerDashboardUI extends JPanel {
         panel.setBackground(Color.WHITE);
 
         // ============================================================
-        // TABEL RIWAYAT
+        // SPLIT PANE: LEFT = DAFTAR OBAT, RIGHT = RINCIAN
         // ============================================================
-        String[] columns = {"No", "Nama Pasien", "Obat", "Kuantitas", "Tanggal"};
-        DefaultTableModel riwayatTableModel = new DefaultTableModel(columns, 0) {
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setDividerLocation(250);
+        splitPane.setResizeWeight(0.3);
+
+        // ============================================================
+        // LEFT PANEL: DAFTAR OBAT (JLIST)
+        // ============================================================
+        JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
+        leftPanel.setBorder(BorderFactory.createTitledBorder("💊 Daftar Obat Terjual"));
+        leftPanel.setBackground(Color.WHITE);
+
+        DefaultListModel<String> listModel = new DefaultListModel<>();
+        JList<String> obatList = new JList<>(listModel);
+        obatList.setFont(new Font("Arial", Font.PLAIN, 13));
+        obatList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JScrollPane listScroll = new JScrollPane(obatList);
+        leftPanel.add(listScroll, BorderLayout.CENTER);
+
+        JLabel totalObatLabel = new JLabel("Total: 0 obat");
+        totalObatLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        leftPanel.add(totalObatLabel, BorderLayout.SOUTH);
+
+        splitPane.setLeftComponent(leftPanel);
+
+        // ============================================================
+        // RIGHT PANEL: RINCIAN TRANSAKSI
+        // ============================================================
+        JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("📋 Rincian Transaksi"));
+        rightPanel.setBackground(Color.WHITE);
+
+        // Label nama obat yang dipilih
+        JLabel obatDipilihLabel = new JLabel("Pilih obat di sebelah kiri");
+        obatDipilihLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        obatDipilihLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        rightPanel.add(obatDipilihLabel, BorderLayout.NORTH);
+
+        // Tabel rincian
+        String[] columns = {"No", "Nama Pasien", "Kuantitas", "Tanggal"};
+        DefaultTableModel rincianTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
+        JTable rincianTable = new JTable(rincianTableModel);
+        rincianTable.setRowHeight(30);
+        rincianTable.getColumnModel().getColumn(0).setMaxWidth(50);
+        rincianTable.getColumnModel().getColumn(2).setMaxWidth(80);
 
-        JTable riwayatTable = new JTable(riwayatTableModel);
-        riwayatTable.setRowHeight(30);
-        riwayatTable.getColumnModel().getColumn(0).setMaxWidth(50);
-        riwayatTable.getColumnModel().getColumn(3).setMaxWidth(80);
+        JScrollPane rincianScroll = new JScrollPane(rincianTable);
+        rightPanel.add(rincianScroll, BorderLayout.CENTER);
 
-        JScrollPane scrollPane = new JScrollPane(riwayatTable);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        // Total transaksi label
+        JLabel totalTransaksiLabel = new JLabel("Total: 0 transaksi");
+        totalTransaksiLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        rightPanel.add(totalTransaksiLabel, BorderLayout.SOUTH);
+
+        splitPane.setRightComponent(rightPanel);
+
+        panel.add(splitPane, BorderLayout.CENTER);
 
         // ============================================================
-        // LOAD DATA
+        // LOAD DATA DAFTAR OBAT
         // ============================================================
         try {
-            List<Object[]> list = strukController.getRiwayatTransaksi();
-            int no = 1;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            for (Object[] row : list) {
-                riwayatTableModel.addRow(new Object[]{
-                        no++,
-                        row[0], // nama_pasien
-                        row[1], // nama_obat
-                        row[2], // kuantitas
-                        row[3] != null ? ((LocalDateTime) row[3]).format(formatter) : "-"
-                });
+            List<String> obatListData = strukController.getDaftarObatTerjual();
+            for (String nama : obatListData) {
+                listModel.addElement(nama);
             }
-
-            // Tambahkan label total
-            JLabel totalLabel = new JLabel("Total transaksi: " + list.size());
-            totalLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-            panel.add(totalLabel, BorderLayout.SOUTH);
-
+            totalObatLabel.setText("Total: " + obatListData.size() + " obat");
         } catch (Exception e) {
-            SwingUtils.showError(this, "Error load riwayat: " + e.getMessage());
+            SwingUtils.showError(panel, "Error load daftar obat: " + e.getMessage());
             e.printStackTrace();
         }
 
         // ============================================================
-        // TOMBOL REFRESH
+        // EVENT LISTENER: KLIK OBAT → TAMPILKAN RINCIAN
         // ============================================================
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton refreshBtn = new JButton("🔄 Refresh");
-        refreshBtn.addActionListener(e -> {
-            riwayatTableModel.setRowCount(0);
+        obatList.addListSelectionListener(e -> {
+            if (e.getValueIsAdjusting()) {
+                return;
+            }
+            String selectedObat = obatList.getSelectedValue();
+            if (selectedObat == null) {
+                return;
+            }
+
+            // Update label
+            obatDipilihLabel.setText("💊 " + selectedObat);
+
+            // Clear table
+            rincianTableModel.setRowCount(0);
+
+            // Load rincian
             try {
-                List<Object[]> list = strukController.getRiwayatTransaksi();
+                List<Object[]> rincian = strukController.getRincianByObat(selectedObat);
                 int no = 1;
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-                for (Object[] row : list) {
-                    riwayatTableModel.addRow(new Object[]{
+                for (Object[] row : rincian) {
+                    rincianTableModel.addRow(new Object[]{
                             no++,
-                            row[0],
-                            row[1],
-                            row[2],
-                            row[3] != null ? ((LocalDateTime) row[3]).format(formatter) : "-"
+                            row[0], // nama_pasien
+                            row[1], // kuantitas
+                            row[2] != null ? ((LocalDateTime) row[2]).format(formatter) : "-"
                     });
                 }
-                // Update total
-                Component[] comps = panel.getComponents();
-                for (Component c : comps) {
-                    if (c instanceof JLabel && ((JLabel) c).getText().startsWith("Total transaksi:")) {
-                        ((JLabel) c).setText("Total transaksi: " + list.size());
-                    }
+                totalTransaksiLabel.setText("Total: " + rincian.size() + " transaksi");
+            } catch (Exception ex) {
+                SwingUtils.showError(panel, "Error load rincian: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
+
+        // ============================================================
+        // TOMBOL REFRESH
+        // ============================================================
+        JPanel topBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton refreshBtn = new JButton("🔄 Refresh");
+        refreshBtn.addActionListener(ev -> {
+            // Refresh daftar obat
+            listModel.clear();
+            try {
+                List<String> obatListData = strukController.getDaftarObatTerjual();
+                for (String nama : obatListData) {
+                    listModel.addElement(nama);
                 }
+                totalObatLabel.setText("Total: " + obatListData.size() + " obat");
             } catch (Exception ex) {
                 SwingUtils.showError(panel, "Error refresh: " + ex.getMessage());
             }
+
+            // Clear rincian
+            rincianTableModel.setRowCount(0);
+            totalTransaksiLabel.setText("Total: 0 transaksi");
+            obatDipilihLabel.setText("Pilih obat di sebelah kiri");
         });
-        btnPanel.add(refreshBtn);
-        panel.add(btnPanel, BorderLayout.NORTH);
+        topBtnPanel.add(refreshBtn);
+        panel.add(topBtnPanel, BorderLayout.NORTH);
 
         return panel;
+    }
+
+    private void refreshDetailTable() {
+        detailTableModel.setRowCount(0);
+        if (selectedResep == null) {
+            subTotalLabel.setText("Rp 0");
+            return;
+        }
+
+        try {
+            List<ResepDetail> details = resepController.getDetailResep(selectedResep.getIdResep());
+            BigDecimal subTotal = BigDecimal.ZERO;
+            for (ResepDetail rd : details) {
+                BigDecimal subtotal = rd.getSubTotal();
+                subTotal = subTotal.add(subtotal);
+                detailTableModel.addRow(new Object[]{
+                        rd.getIdResepDetail(),
+                        rd.getNamaObat(),
+                        rd.getJumlah(),
+                        rd.getHargaSatuan() != null ? "Rp " + rd.getHargaSatuan() : "-",
+                        "Rp " + subtotal
+                });
+            }
+            subTotalLabel.setText("Rp " + subTotal);
+
+            // Update detail resep area dengan info tambahan
+            if (selectedResep != null) {
+                detailResepArea.setText("Pasien: " + selectedResep.getNamaPasien() + "\n" +
+                        "Dokter: " + selectedResep.getNamaDokter() + "\n" +
+                        "Resep: " + selectedResep.getObatDanPerlakuan() + "\n" +
+                        "Status: " + selectedResep.getStatusResep().getDisplayName() +
+                        " | Item terassign: " + details.size());
+            }
+
+            hitungTotal();
+
+        } catch (Exception e) {
+            SwingUtils.showError(this, "Error refresh detail: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // ============================================================
+// EDIT JUMLAH OBAT YANG SUDAH DIASSIGN
+// ============================================================
+    private void editJumlah() {
+        int row = detailTable.getSelectedRow();
+        if (row < 0) {
+            SwingUtils.showError(this, "Pilih obat yang akan diedit!");
+            return;
+        }
+
+        int idResepDetail = (int) detailTableModel.getValueAt(row, 0);
+        String namaObat = (String) detailTableModel.getValueAt(row, 1);
+        int jumlahSekarang = (int) detailTableModel.getValueAt(row, 2);
+
+        String input = JOptionPane.showInputDialog(this,
+                "Masukkan jumlah baru untuk " + namaObat + ":",
+                "Edit Jumlah",
+                JOptionPane.QUESTION_MESSAGE);
+        if (input == null || input.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            int jumlahBaru = Integer.parseInt(input.trim());
+            if (jumlahBaru <= 0) {
+                SwingUtils.showError(this, "Jumlah harus lebih dari 0!");
+                return;
+            }
+
+            boolean success = resepController.updateJumlahResepDetail(idResepDetail, jumlahBaru);
+            if (success) {
+                SwingUtils.showSuccess(this, "✅ Jumlah " + namaObat + " diubah menjadi " + jumlahBaru);
+                refreshDetailTable();
+                loadData();
+                loadObat();
+            } else {
+                SwingUtils.showError(this, "Gagal mengubah jumlah!");
+            }
+        } catch (NumberFormatException e) {
+            SwingUtils.showError(this, "Jumlah harus berupa angka!");
+        } catch (Exception e) {
+            SwingUtils.showError(this, "Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // ============================================================
+// HAPUS OBAT YANG SUDAH DIASSIGN
+// ============================================================
+    private void hapusItem() {
+        int row = detailTable.getSelectedRow();
+        if (row < 0) {
+            SwingUtils.showError(this, "Pilih obat yang akan dihapus!");
+            return;
+        }
+
+        int idResepDetail = (int) detailTableModel.getValueAt(row, 0);
+        String namaObat = (String) detailTableModel.getValueAt(row, 1);
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Yakin ingin menghapus " + namaObat + " dari daftar assign?",
+                "Konfirmasi Hapus",
+                JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            boolean success = resepController.hapusResepDetail(idResepDetail);
+            if (success) {
+                SwingUtils.showSuccess(this, "✅ " + namaObat + " berhasil dihapus!");
+                refreshDetailTable();
+                loadData();
+                loadObat();
+            } else {
+                SwingUtils.showError(this, "Gagal menghapus item!");
+            }
+        } catch (Exception e) {
+            SwingUtils.showError(this, "Error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

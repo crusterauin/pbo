@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class KunjunganDAO implements GenericDAO<Kunjungan> {
 
@@ -169,5 +170,16 @@ public class KunjunganDAO implements GenericDAO<Kunjungan> {
         k.setNamaPasien(rs.getString("nama_pasien"));
         k.setNamaDokter(rs.getString("nama_dokter"));
         return k;
+    }
+
+    public LocalDateTime getTanggalKunjunganTerakhir(String idPasien) throws SQLException {
+        String sql = "SELECT tanggal_kunjungan FROM tb_kunjungan " +
+                "WHERE id_pasien = ? " +
+                "ORDER BY tanggal_kunjungan DESC LIMIT 1";
+        ResultSet rs = dbManager.executeQuery(sql, idPasien);
+        if (rs.next()) {
+            return rs.getTimestamp("tanggal_kunjungan").toLocalDateTime();
+        }
+        return null;
     }
 }

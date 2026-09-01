@@ -180,4 +180,46 @@ public class StrukDAO implements GenericDAO<Struk> {
         }
         return list;
     }
+    // ============================================================
+// GET DAFTAR OBAT YANG PERNAH DIBELI (UNIK)
+// ============================================================
+    public List<String> getDaftarObatTerjual() throws SQLException {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT DISTINCT o.nama_obat " +
+                "FROM tb_obat o " +
+                "JOIN tb_resep_detail rd ON rd.id_obat = o.id_obat " +
+                "JOIN tb_resep r ON r.id_resep = rd.id_resep " +
+                "JOIN tb_struk s ON s.id_resep = r.id_resep " +
+                "ORDER BY o.nama_obat ASC";
+        ResultSet rs = dbManager.executeQuery(sql);
+        while (rs.next()) {
+            list.add(rs.getString("nama_obat"));
+        }
+        return list;
+    }
+
+    public List<Object[]> getRincianByObat(String namaObat) throws SQLException {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT " +
+                "p.nama AS nama_pasien, " +
+                "rd.jumlah AS kuantitas, " +
+                "s.waktu_cetak AS tanggal_transaksi " +
+                "FROM tb_struk s " +
+                "JOIN tb_resep r ON s.id_resep = r.id_resep " +
+                "JOIN tb_kunjungan k ON r.id_kunjungan = k.id_kunjungan " +
+                "JOIN tb_pasien p ON k.id_pasien = p.id_pasien " +
+                "JOIN tb_resep_detail rd ON rd.id_resep = r.id_resep " +
+                "JOIN tb_obat o ON rd.id_obat = o.id_obat " +
+                "WHERE o.nama_obat = ? " +
+                "ORDER BY s.waktu_cetak DESC";
+        ResultSet rs = dbManager.executeQuery(sql, namaObat);
+        while (rs.next()) {
+            Object[] row = new Object[3];
+            row[0] = rs.getString("nama_pasien");
+            row[1] = rs.getInt("kuantitas");
+            row[2] = rs.getTimestamp("tanggal_transaksi").toLocalDateTime();
+            list.add(row);
+        }
+        return list;
+    }
 }

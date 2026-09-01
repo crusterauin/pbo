@@ -5,15 +5,19 @@ import com.sirekam.dao.StrukDAO;
 import com.sirekam.dao.ResepDAO;
 import com.sirekam.dao.ResepDetailDAO;
 import com.sirekam.dao.KunjunganDAO;
+import com.sirekam.pattern.strategy.AsuransiBiayaStrategy;
+import com.sirekam.pattern.strategy.BPJSBiayaStrategy;
 import com.sirekam.pattern.strategy.BiayaStrategy;
 import com.sirekam.pattern.strategy.RegulerBiayaStrategy;
 import com.sirekam.model.enums.StatusKunjungan;
 import com.sirekam.model.enums.StatusResep;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.sirekam.dao.ResepDetailDAO;
 import com.sirekam.model.ResepDetail;
+import com.sirekam.util.DatabaseManager;
 
 public class StrukController extends GenericController<Struk> {
 
@@ -182,5 +186,42 @@ public class StrukController extends GenericController<Struk> {
 
     public List<Object[]> getRiwayatTransaksi() throws SQLException {
         return strukDAO.getRiwayatTransaksi();
+    }
+
+    public List<String> getDaftarObatTerjual() throws SQLException {
+        return strukDAO.getDaftarObatTerjual();
+    }
+
+    public List<Object[]> getRincianByObat(String namaObat) throws SQLException {
+        return strukDAO.getRincianByObat(namaObat);
+    }
+
+    public void autoSelectStrategy(int idResep) throws SQLException {
+        Resep resep = resepDAO.findById(idResep);
+        if (resep == null) {
+            throw new SQLException("Resep tidak ditemukan");
+        }
+
+        Kunjungan kunjungan = kunjunganDAO.findById(resep.getIdKunjungan());
+        if (kunjungan == null) {
+            throw new SQLException("Kunjungan tidak ditemukan");
+        }
+
+        // Ambil pasien dari kunjungan
+        // (Asumsikan ada method getPasienById di PasienController)
+        // Atau langsung query di sini
+        DatabaseManager dbManager = DatabaseManager.getInstance();
+        String sql = "SELECT jenis_asuransi FROM tb_pasien WHERE id_pasien = ?";
+        ResultSet rs = dbManager.executeQuery(sql, kunjungan.getIdPasien());
+        if (rs.next()) {
+            String jenisAsuransi = rs.getString("jenis_asuransi");
+            if ("BPJS".equals(jenisAsuransi)) {
+                setStrategy(new BPJSBiayaStrategy());
+            } else if ("ASURANSI".equals(jenisAsuransi)) {
+                setStrategy(new AsuransiBiayaStrategy());
+            } else {
+                setStrategy(new RegulerBiayaStrategy());
+            }
+        }
     }
 }

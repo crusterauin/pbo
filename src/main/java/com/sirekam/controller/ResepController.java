@@ -93,4 +93,12 @@ public class ResepController extends GenericController<Resep> {
         list.addAll(resepDAO.getResepDiproses());
         return list;
     }
+
+    public boolean updateJumlahResepDetail(int idResepDetail, int jumlahBaru) throws SQLException {
+        return resepDetailDAO.updateJumlah(idResepDetail, jumlahBaru);
+    }
+
+    public boolean hapusResepDetail(int idResepDetail) throws SQLException {
+        return resepDetailDAO.deleteById(idResepDetail);
+    }
 }

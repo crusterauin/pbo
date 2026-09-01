@@ -17,6 +17,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class PetugasDashboardUI extends JPanel {
 
@@ -111,9 +112,7 @@ public class PetugasDashboardUI extends JPanel {
         // Search
         JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
         searchField = new JTextField();
-        searchField.setToolTipText("Cari berdasarkan nama atau No RM");
         searchField.addActionListener(e -> searchPasien());
 
         JButton searchBtn = new JButton("🔍 Cari");
@@ -135,8 +134,10 @@ public class PetugasDashboardUI extends JPanel {
 
         panel.add(searchPanel, BorderLayout.NORTH);
 
-        // Table
-        String[] columns = {"No RM", "Nama", "Tgl Lahir", "JK", "Asuransi", "No HP"};
+        // ============================================================
+        // TABLE - TAMBAH KOLOM "Kunjungan Terakhir"
+        // ============================================================
+        String[] columns = {"No RM", "Nama", "Tgl Lahir", "JK", "Asuransi", "No HP", "Kunjungan Terakhir"};
         pasienTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -216,25 +217,36 @@ public class PetugasDashboardUI extends JPanel {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         btnPanel.setBackground(Color.WHITE);
 
+        // Tombol Simpan Kunjungan
         JButton simpanBtn = new JButton("💾 Simpan Kunjungan");
         simpanBtn.setBackground(new Color(41, 128, 185));
         simpanBtn.setForeground(Color.WHITE);
         simpanBtn.addActionListener(e -> simpanKunjungan());
         simpanBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
-        // ============ TOMBOL LIHAT RIWAYAT ============
+        // ============================================================
+        // TOMBOL EDIT PASIEN (BARU)
+        // ============================================================
+        JButton editBtn = new JButton("✏️ Edit Pasien");
+        editBtn.setBackground(new Color(241, 196, 15));
+        editBtn.setForeground(Color.WHITE);
+        editBtn.addActionListener(e -> editPasien());
+        editBtn.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Tombol Riwayat
         JButton riwayatBtn = new JButton("📋 Riwayat");
         riwayatBtn.setBackground(new Color(155, 89, 182));
         riwayatBtn.setForeground(Color.WHITE);
         riwayatBtn.addActionListener(e -> lihatRiwayat());
         riwayatBtn.setFont(new Font("Arial", Font.BOLD, 12));
-        // ===============================================
 
+        // Tombol Reset
         JButton resetBtn = new JButton("↺ Reset");
         resetBtn.addActionListener(e -> resetForm());
 
         btnPanel.add(simpanBtn);
-        btnPanel.add(riwayatBtn);  // <-- TAMBAHKAN
+        btnPanel.add(editBtn);   // <-- TAMBAHKAN
+        btnPanel.add(riwayatBtn);
         btnPanel.add(resetBtn);
         formPanel.add(btnPanel, gbc);
 
@@ -338,13 +350,26 @@ public class PetugasDashboardUI extends JPanel {
         PasienIterator iterator = new PasienIterator(list);
         while (iterator.hasNext()) {
             Pasien p = iterator.next();
+
+            // Ambil tanggal kunjungan terakhir
+            String tglKunjunganTerakhir = "-";
+            try {
+                LocalDateTime tgl = kunjunganController.getTanggalKunjunganTerakhir(p.getIdPasien());
+                if (tgl != null) {
+                    tglKunjunganTerakhir = tgl.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                }
+            } catch (Exception e) {
+                // Abaikan error, tampilkan "-"
+            }
+
             pasienTableModel.addRow(new Object[]{
                     p.getIdPasien(),
                     p.getNama(),
                     p.getTanggalLahir() != null ? p.getTanggalLahir().format(DATE_FORMATTER) : "-",
                     p.getJenisKelamin() != null ? p.getJenisKelamin().getDisplayName() : "-",
                     p.getJenisAsuransi() != null ? p.getJenisAsuransi() : "REGULER",
-                    p.getNoHp() != null ? p.getNoHp() : "-"
+                    p.getNoHp() != null ? p.getNoHp() : "-",
+                    tglKunjunganTerakhir
             });
         }
     }
@@ -422,5 +447,32 @@ public class PetugasDashboardUI extends JPanel {
         selectedPasien = null;
         searchField.setText("");
         loadPasienData();
+    }
+
+    // ============================================================
+// EDIT DATA PASIEN
+// ============================================================
+    private void editPasien() {
+        if (selectedPasien == null) {
+            SwingUtils.showError(this, "Silakan pilih pasien terlebih dahulu!");
+            return;
+        }
+
+        FormEditPasienDialog dialog = new FormEditPasienDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                selectedPasien
+        );
+        dialog.setVisible(true);
+
+        if (dialog.isUpdated()) {
+            // Refresh data pasien
+            loadPasienData();
+            // Refresh selected pasien
+            try {
+                selectedPasien = pasienController.cariById(selectedPasien.getIdPasien());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

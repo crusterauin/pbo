@@ -4,6 +4,7 @@ import com.sirekam.model.Kunjungan;
 import com.sirekam.model.enums.StatusKunjungan;
 import com.sirekam.dao.KunjunganDAO;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class KunjunganController extends GenericController<Kunjungan> {
@@ -38,5 +39,9 @@ public class KunjunganController extends GenericController<Kunjungan> {
 
     public List<Kunjungan> getKunjunganMenunggu() throws SQLException {
         return kunjunganDAO.getKunjunganMenunggu();
+    }
+
+    public LocalDateTime getTanggalKunjunganTerakhir(String idPasien) throws SQLException {
+        return kunjunganDAO.getTanggalKunjunganTerakhir(idPasien);
     }
 }

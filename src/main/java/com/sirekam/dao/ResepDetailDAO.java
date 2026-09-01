@@ -167,4 +167,16 @@ public class ResepDetailDAO implements GenericDAO<ResepDetail> {
         rd.setHargaSatuan(rs.getBigDecimal("harga_satuan"));
         return rd;
     }
+
+    public boolean updateJumlah(int idResepDetail, int jumlahBaru) throws SQLException {
+        String sql = "UPDATE tb_resep_detail SET jumlah = ? WHERE id_resep_detail = ?";
+        int result = dbManager.executeUpdate(sql, jumlahBaru, idResepDetail);
+        return result > 0;
+    }
+
+    public boolean deleteById(int idResepDetail) throws SQLException {
+        String sql = "DELETE FROM tb_resep_detail WHERE id_resep_detail = ?";
+        int result = dbManager.executeUpdate(sql, idResepDetail);
+        return result > 0;
+    }
 }
