@@ -12,6 +12,15 @@ public class SIREKAMLauncher extends JFrame {
     private JFrame dokterFrame = null;
     private JFrame apotekerFrame = null;
 
+    // Menyimpan referensi label pada setiap card agar ukuran font
+    // dapat menyesuaikan (responsive) saat window di-maximize / di-resize
+    private final java.util.List<JLabel> cardTitleLabels = new java.util.ArrayList<>();
+    private final java.util.List<JLabel> cardSubLabels = new java.util.ArrayList<>();
+    private final java.util.List<JLabel> cardDescLabels = new java.util.ArrayList<>();
+
+    // Lebar acuan (base width) saat ukuran font awal (16 / 11 / 11) ditentukan
+    private static final int BASE_WIDTH = 800;
+
     public SIREKAMLauncher() {
         setTitle("SIREKAM - Sistem Informasi Rekam Medis");
         setSize(800, 500);
@@ -77,6 +86,53 @@ public class SIREKAMLauncher extends JFrame {
         footerLabel.setForeground(Color.GRAY);
         footerPanel.add(footerLabel);
         add(footerPanel, BorderLayout.SOUTH);
+
+        // Listener untuk menyesuaikan ukuran font saat frame di-resize / di-maximize
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                adjustFontSizes();
+            }
+        });
+    }
+
+    /**
+     * Menyesuaikan ukuran font judul, subjudul, dan deskripsi pada seluruh
+     * panel card berdasarkan lebar frame saat ini dibandingkan lebar acuan.
+     * Dipanggil otomatis setiap kali frame di-resize (termasuk saat maximize).
+     */
+    private void adjustFontSizes() {
+        double scale = getWidth() / (double) BASE_WIDTH;
+        // Batasi skala agar font tidak terlalu kecil atau terlalu besar
+        scale = Math.max(0.85, Math.min(scale, 1.9));
+
+        int titleSize = (int) Math.round(16 * scale);
+        int subSize = (int) Math.round(11 * scale);
+        int descSize = (int) Math.round(11 * scale);
+
+        for (JLabel l : cardTitleLabels) {
+            l.setFont(new Font("Arial", Font.BOLD, titleSize));
+        }
+        for (JLabel l : cardSubLabels) {
+            l.setFont(new Font("Arial", Font.PLAIN, subSize));
+        }
+        for (JLabel l : cardDescLabels) {
+            l.setFont(new Font("Arial", Font.PLAIN, descSize));
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Menghasilkan versi "soft" (pastel) dari sebuah warna dengan mencampurnya
+     * dengan putih. whiteAmount 0.0 = warna asli, 1.0 = putih penuh.
+     */
+    private Color softenColor(Color base, float whiteAmount) {
+        int r = (int) (base.getRed() * (1 - whiteAmount) + 255 * whiteAmount);
+        int g = (int) (base.getGreen() * (1 - whiteAmount) + 255 * whiteAmount);
+        int b = (int) (base.getBlue() * (1 - whiteAmount) + 255 * whiteAmount);
+        return new Color(r, g, b);
     }
 
     private JPanel createRoleCard(String title, String subtitle,
@@ -120,6 +176,12 @@ public class SIREKAMLauncher extends JFrame {
         textPanel.add(descLabel);
         card.add(textPanel, BorderLayout.CENTER);
 
+        // Daftarkan label ke list agar ukuran fontnya ikut menyesuaikan
+        // ketika window di-resize / di-maximize
+        cardTitleLabels.add(titleLabel);
+        cardSubLabels.add(subLabel);
+        cardDescLabels.add(descLabel);
+
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnPanel.setBackground(Color.WHITE);
         JButton btn = new JButton("Buka " + title);
@@ -133,12 +195,16 @@ public class SIREKAMLauncher extends JFrame {
         btnPanel.add(btn);
         card.add(btnPanel, BorderLayout.SOUTH);
 
+        // Warna soft (pastel) hasil campuran warna role dengan putih,
+        // dipakai sebagai latar saat card disentuh/di-hover
+        final Color softHoverColor = softenColor(color, 0.85f);
+
         card.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                card.setBackground(new Color(248, 249, 250));
-                iconPanel.setBackground(new Color(248, 249, 250));
-                textPanel.setBackground(new Color(248, 249, 250));
-                btnPanel.setBackground(new Color(248, 249, 250));
+                card.setBackground(softHoverColor);
+                iconPanel.setBackground(softHoverColor);
+                textPanel.setBackground(softHoverColor);
+                btnPanel.setBackground(softHoverColor);
                 card.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(color, 2),
                         BorderFactory.createEmptyBorder(20, 15, 20, 15)
@@ -207,3 +273,7 @@ public class SIREKAMLauncher extends JFrame {
         });
     }
 }
+
+
+
+
