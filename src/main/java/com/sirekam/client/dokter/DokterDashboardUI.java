@@ -65,7 +65,7 @@ public class DokterDashboardUI extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(46, 204, 113));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        JLabel title = new JLabel("👨‍⚕️ Dashboard Dokter");
+        JLabel title = new JLabel("Dashboard Dokter");
         title.setFont(new Font("Arial", Font.BOLD, 18));
         title.setForeground(Color.WHITE);
         JLabel userInfo = new JLabel("👤 " + currentUser.getNamaLengkap() + " | " +

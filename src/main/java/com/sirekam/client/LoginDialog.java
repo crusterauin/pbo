@@ -31,7 +31,7 @@ public class LoginDialog extends JDialog {
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(41, 128, 185));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 15, 20));
-        JLabel headerLabel = new JLabel("🔐 SIREKAM - Login");
+        JLabel headerLabel = new JLabel("SIREKAM - Login");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 18));
         headerLabel.setForeground(Color.WHITE);
         headerPanel.add(headerLabel);
@@ -99,7 +99,7 @@ public class LoginDialog extends JDialog {
         // SOLUSI: FORCE CLOSE
         // ============================================================
         cancelButton.addActionListener(e -> {
-            System.out.println("🔴 [DEBUG] Tombol Batal diklik!");
+            System.out.println("🔴= [DEBUG] Tombol Batal diklik!");
             closeDialog(); // Panggil method khusus
         });
 

@@ -30,7 +30,7 @@ public class SIREKAMLauncher extends JFrame {
         headerPanel.setBackground(new Color(41, 128, 185));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel titleLabel = new JLabel("🏥 SISTEM INFORMASI REKAM MEDIS");
+        JLabel titleLabel = new JLabel(" SISTEM INFORMASI REKAM MEDIS");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         titleLabel.setForeground(Color.WHITE);
         headerPanel.add(titleLabel, BorderLayout.WEST);
@@ -47,22 +47,20 @@ public class SIREKAMLauncher extends JFrame {
         cardPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         cardPanel.setBackground(new Color(240, 244, 248));
 
-        cardPanel.add(createRoleCard(
-                "🧑‍⚕️", "PETUGAS", "Pendaftaran & Administrasi",
+        cardPanel.add(createRoleCard("PETUGAS", "Pendaftaran & Administrasi",
                 "Mendaftarkan pasien,\nmencatat keluhan, assign dokter",
                 new Color(52, 152, 219),
                 e -> openPetugasApp()
         ));
 
-        cardPanel.add(createRoleCard(
-                "👨‍⚕️", "DOKTER", "Pelayanan Medis",
+        cardPanel.add(createRoleCard("DOKTER", "Pelayanan Medis",
                 "Melihat pasien ditugaskan,\nmenulis resep, koordinasi",
                 new Color(46, 204, 113),
                 e -> openDokterApp()
         ));
 
         cardPanel.add(createRoleCard(
-                "💊", "APOTEKER", "Farmasi & Pembayaran",
+                "APOTEKER", "Farmasi & Pembayaran",
                 "Mengelola obat, assign obat,\ndan cetak struk pembayaran",
                 new Color(155, 89, 182),
                 e -> openApotekerApp()
@@ -81,7 +79,7 @@ public class SIREKAMLauncher extends JFrame {
         add(footerPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createRoleCard(String icon, String title, String subtitle,
+    private JPanel createRoleCard(String title, String subtitle,
                                   String description, Color color,
                                   java.awt.event.ActionListener action) {
         JPanel card = new JPanel();
@@ -94,9 +92,6 @@ public class SIREKAMLauncher extends JFrame {
 
         JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         iconPanel.setBackground(Color.WHITE);
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setFont(new Font("Segoe UI", Font.PLAIN, 48));
-        iconPanel.add(iconLabel);
         card.add(iconPanel, BorderLayout.NORTH);
 
         JPanel textPanel = new JPanel();

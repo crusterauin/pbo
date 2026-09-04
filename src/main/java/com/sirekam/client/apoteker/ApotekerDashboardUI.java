@@ -74,7 +74,7 @@ public class ApotekerDashboardUI extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(155, 89, 182));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        JLabel title = new JLabel("💊 Dashboard Apoteker");
+        JLabel title = new JLabel("Dashboard Apoteker");
         title.setFont(new Font("Arial", Font.BOLD, 18));
         title.setForeground(Color.WHITE);
         JLabel userInfo = new JLabel("👤 " + currentUser.getNamaLengkap() + " | " +
@@ -151,7 +151,7 @@ public class ApotekerDashboardUI extends JPanel {
 
     private JPanel createRightPanel() {
         JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("💊 Proses Resep"));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("Proses Resep"));
         rightPanel.setBackground(Color.WHITE);
 
         JPanel detailPanel = new JPanel(new GridBagLayout());
@@ -183,7 +183,7 @@ public class ApotekerDashboardUI extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
-        detailPanel.add(new JLabel("📋 Obat yang sudah diassign:"), gbc);
+        detailPanel.add(new JLabel("=Obat yang sudah diassign:"), gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -252,7 +252,7 @@ public class ApotekerDashboardUI extends JPanel {
 
         gbc.gridx = 1;
         gbc.gridy = 7;
-        JButton assignBtn = new JButton("💾 Assign Obat");
+        JButton assignBtn = new JButton(" Assign Obat");
         assignBtn.setBackground(new Color(41, 128, 185));
         assignBtn.setForeground(Color.WHITE);
         assignBtn.addActionListener(e -> assignObat());
@@ -266,12 +266,12 @@ public class ApotekerDashboardUI extends JPanel {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         btnPanel.setBackground(Color.WHITE);
 
-        JButton editBtn = new JButton("✏️ Edit Jumlah");
+        JButton editBtn = new JButton("Edit Jumlah");
         editBtn.setBackground(new Color(241, 196, 15));
         editBtn.setForeground(Color.WHITE);
         editBtn.addActionListener(e -> editJumlah());
 
-        JButton deleteBtn = new JButton("🗑️ Hapus");
+        JButton deleteBtn = new JButton("Hapus");
         deleteBtn.setBackground(new Color(231, 76, 60));
         deleteBtn.setForeground(Color.WHITE);
         deleteBtn.addActionListener(e -> hapusItem());

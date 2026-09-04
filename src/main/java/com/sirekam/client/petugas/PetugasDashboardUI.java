@@ -90,8 +90,8 @@ public class PetugasDashboardUI extends JPanel {
         header.setBackground(new Color(41, 128, 185));
         header.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        JLabel title = new JLabel("🧑‍⚕️ Dashboard Petugas");
-        title.setFont(new Font("Arial", Font.BOLD, 18));
+        JLabel title = new JLabel("Dashboard Petugas");
+        title.setFont(new Font("Arial", Font.BOLD, 30));
         title.setForeground(Color.WHITE);
 
         JLabel userInfo = new JLabel("👤 " + currentUser.getNamaLengkap() + " | " +
@@ -105,7 +105,7 @@ public class PetugasDashboardUI extends JPanel {
     }
 
     private JPanel createLeftPanel() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        JPanel panel = new JPanel(new BorderLayout(10, 7));
         panel.setBorder(BorderFactory.createTitledBorder("🔍 Data Pasien"));
         panel.setBackground(Color.WHITE);
 
