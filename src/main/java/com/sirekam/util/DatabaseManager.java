@@ -8,9 +8,9 @@ public class DatabaseManager {
     private static DatabaseManager instance;
 
     private Connection connection;
-    private static final String URL = "jdbc:mysql://localhost:3306/sirekam";
-    private static final String USERNAME = "222413644";
-    private static final String PASSWORD = "Dhantaputra14";
+    private static final String URL = "jdbc:mysql://localhost:8889/sirekam";
+    private static final String USERNAME = "root";
+    private static final String PASSWORD = "root";
 
     private DatabaseManager() {
         try {

@@ -36,10 +36,10 @@ public class ClientHandler implements Runnable {
             if (firstLine != null && firstLine.startsWith("LOGIN|")) {
                 String[] parts = firstLine.split("\\|");
                 this.userId = Integer.parseInt(parts[1]);
-                System.out.println("👤 Client logged in as user: " + userId);
+                System.out.println("Client logged in as user: " + userId);
                 writer.println("LOGIN_OK|" + userId);
             } else {
-                System.out.println("❌ Invalid login from: " +
+                System.out.println("Invalid login from: " +
                         socket.getRemoteSocketAddress());
                 return;
             }
@@ -51,9 +51,9 @@ public class ClientHandler implements Runnable {
             }
 
         } catch (SocketTimeoutException e) {
-            System.out.println("⏰ Client timeout: " + socket.getRemoteSocketAddress());
+            System.out.println("Client timeout: " + socket.getRemoteSocketAddress());
         } catch (IOException e) {
-            System.out.println("⚠️ Client disconnected: " + e.getMessage());
+            System.out.println("Client disconnected: " + e.getMessage());
         } finally {
             close();
         }
@@ -64,7 +64,7 @@ public class ClientHandler implements Runnable {
             // Decode pesan dari client
             ChatMessage message = ChatProtocol.decode(inputLine);
             if (message == null) {
-                System.out.println("⚠️ Invalid message format: " + inputLine);
+                System.out.println("Invalid message format: " + inputLine);
                 writer.println("ERROR|Invalid message format");
                 return;
             }
@@ -73,7 +73,7 @@ public class ClientHandler implements Runnable {
             int chatId = chatDAO.insert(message);
             if (chatId > 0) {
                 message.setIdChat(chatId);
-                System.out.println("💬 Message saved: " + message.getIsiPesan());
+                System.out.println("Message saved: " + message.getIsiPesan());
 
                 // Kirim ke penerima (jika online)
                 ChatServer.sendToClient(message.getIdPenerima(), inputLine);
@@ -85,7 +85,7 @@ public class ClientHandler implements Runnable {
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Error processing message: " + e.getMessage());
+            System.err.println("Error processing message: " + e.getMessage());
             writer.println("ERROR|" + e.getMessage());
         }
     }
@@ -109,7 +109,7 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Error closing client: " + e.getMessage());
         }
-        System.out.println("👋 Client disconnected: " + userId);
+        System.out.println("Client disconnected: " + userId);
         ChatServer.removeClient(this);
     }
 }

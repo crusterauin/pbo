@@ -68,7 +68,7 @@ public class DokterDashboardUI extends JPanel {
         JLabel title = new JLabel("Dashboard Dokter");
         title.setFont(new Font("Arial", Font.BOLD, 18));
         title.setForeground(Color.WHITE);
-        JLabel userInfo = new JLabel("👤 " + currentUser.getNamaLengkap() + " | " +
+        JLabel userInfo = new JLabel(currentUser.getNamaLengkap() + " | " +
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         userInfo.setForeground(Color.WHITE);
         headerPanel.add(title, BorderLayout.WEST);
@@ -86,9 +86,9 @@ public class DokterDashboardUI extends JPanel {
         JPanel leftPanel = createLeftPanel();
 
         JTabbedPane leftTabbedPane = new JTabbedPane();
-        leftTabbedPane.addTab("📋 Pasien Ditugaskan", leftPanel);
-        leftTabbedPane.addTab("💬 Chat Petugas", createChatPetugasPanel());
-        leftTabbedPane.addTab("💬 Chat Apoteker", createChatApotekerPanel());
+        leftTabbedPane.addTab("Pasien Ditugaskan", leftPanel);
+        leftTabbedPane.addTab("Chat Petugas", createChatPetugasPanel());
+        leftTabbedPane.addTab("Chat Apoteker", createChatApotekerPanel());
 
         splitPane.setLeftComponent(leftTabbedPane);
 
@@ -110,7 +110,6 @@ public class DokterDashboardUI extends JPanel {
 
     private JPanel createLeftPanel() {
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
-        leftPanel.setBorder(BorderFactory.createTitledBorder("📋 Pasien Ditugaskan"));
         leftPanel.setBackground(Color.WHITE);
 
         String[] columns = {"No RM", "Nama", "Keluhan", "Status"};
@@ -132,7 +131,7 @@ public class DokterDashboardUI extends JPanel {
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         leftPanel.add(statusLabel, BorderLayout.SOUTH);
 
-        JButton refreshBtn = new JButton("🔄 Refresh");
+        JButton refreshBtn = new JButton("Refresh");
         refreshBtn.addActionListener(e -> loadData());
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnPanel.add(refreshBtn);
@@ -143,7 +142,7 @@ public class DokterDashboardUI extends JPanel {
 
     private JPanel createRightPanel() {
         JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("📝 Detail Pasien & Resep"));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("Detail Pasien & Resep"));
         rightPanel.setBackground(Color.WHITE);
 
         JPanel detailPanel = new JPanel(new GridBagLayout());
@@ -192,7 +191,7 @@ public class DokterDashboardUI extends JPanel {
         gbc.gridy = 3;
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         btnPanel.setBackground(Color.WHITE);
-        JButton kirimBtn = new JButton("📤 Kirim Resep ke Apoteker");
+        JButton kirimBtn = new JButton("Kirim Resep ke Apoteker");
         kirimBtn.setBackground(new Color(46, 204, 113));
         kirimBtn.setForeground(Color.WHITE);
         kirimBtn.addActionListener(e -> kirimResep());

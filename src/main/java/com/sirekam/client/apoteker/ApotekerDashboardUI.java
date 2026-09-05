@@ -77,7 +77,7 @@ public class ApotekerDashboardUI extends JPanel {
         JLabel title = new JLabel("Dashboard Apoteker");
         title.setFont(new Font("Arial", Font.BOLD, 18));
         title.setForeground(Color.WHITE);
-        JLabel userInfo = new JLabel("👤 " + currentUser.getNamaLengkap() + " | " +
+        JLabel userInfo = new JLabel(currentUser.getNamaLengkap() + " | " +
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         userInfo.setForeground(Color.WHITE);
         headerPanel.add(title, BorderLayout.WEST);
@@ -92,9 +92,9 @@ public class ApotekerDashboardUI extends JPanel {
         // Left Panel - Resep Masuk + Chat
         JPanel leftPanel = createLeftPanel();
         JTabbedPane leftTabbedPane = new JTabbedPane();
-        leftTabbedPane.addTab("📋 Resep Masuk", leftPanel);
-        leftTabbedPane.addTab("📋 Riwayat Transaksi", createRiwayatPanel());
-        leftTabbedPane.addTab("💬 Chat", createChatPanel());
+        leftTabbedPane.addTab("Resep Masuk", leftPanel);
+        leftTabbedPane.addTab("Riwayat Transaksi", createRiwayatPanel());
+        leftTabbedPane.addTab("Chat", createChatPanel());
         splitPane.setLeftComponent(leftTabbedPane);
 
         // Right Panel - Proses Resep
@@ -115,7 +115,6 @@ public class ApotekerDashboardUI extends JPanel {
 
     private JPanel createLeftPanel() {
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
-        leftPanel.setBorder(BorderFactory.createTitledBorder("📋 Resep Masuk"));
         leftPanel.setBackground(Color.WHITE);
 
         String[] columns = {"No Resep", "Pasien", "Dokter", "Status"};
@@ -137,7 +136,7 @@ public class ApotekerDashboardUI extends JPanel {
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         leftPanel.add(statusLabel, BorderLayout.SOUTH);
 
-        JButton refreshBtn = new JButton("🔄 Refresh");
+        JButton refreshBtn = new JButton("Refresh");
         refreshBtn.addActionListener(e -> {
             loadData();
             loadObat();
@@ -183,7 +182,7 @@ public class ApotekerDashboardUI extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
-        detailPanel.add(new JLabel("=Obat yang sudah diassign:"), gbc);
+        detailPanel.add(new JLabel("Obat yang sudah diassign:"), gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -282,7 +281,7 @@ public class ApotekerDashboardUI extends JPanel {
 
         gbc.gridx = 1;
         gbc.gridy = 10;
-        JButton cetakBtn = new JButton("🧾 Cetak Struk");
+        JButton cetakBtn = new JButton("Cetak Struk");
         cetakBtn.setBackground(new Color(46, 204, 113));
         cetakBtn.setForeground(Color.WHITE);
         cetakBtn.addActionListener(e -> cetakStruk());
@@ -578,7 +577,6 @@ public class ApotekerDashboardUI extends JPanel {
 
     private JPanel createRiwayatPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setBorder(BorderFactory.createTitledBorder("📋 Riwayat Transaksi Obat"));
         panel.setBackground(Color.WHITE);
 
         // ============================================================
@@ -592,7 +590,7 @@ public class ApotekerDashboardUI extends JPanel {
         // LEFT PANEL: DAFTAR OBAT (JLIST)
         // ============================================================
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
-        leftPanel.setBorder(BorderFactory.createTitledBorder("💊 Daftar Obat Terjual"));
+        leftPanel.setBorder(BorderFactory.createTitledBorder("Daftar Obat Terjual"));
         leftPanel.setBackground(Color.WHITE);
 
         DefaultListModel<String> listModel = new DefaultListModel<>();
@@ -613,7 +611,7 @@ public class ApotekerDashboardUI extends JPanel {
         // RIGHT PANEL: RINCIAN TRANSAKSI
         // ============================================================
         JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("📋 Rincian Transaksi"));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("Rincian Transaksi"));
         rightPanel.setBackground(Color.WHITE);
 
         // Label nama obat yang dipilih
@@ -703,7 +701,7 @@ public class ApotekerDashboardUI extends JPanel {
         // TOMBOL REFRESH
         // ============================================================
         JPanel topBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton refreshBtn = new JButton("🔄 Refresh");
+        JButton refreshBtn = new JButton("Refresh");
         refreshBtn.addActionListener(ev -> {
             // Refresh daftar obat
             listModel.clear();
@@ -723,7 +721,7 @@ public class ApotekerDashboardUI extends JPanel {
             obatDipilihLabel.setText("Pilih obat di sebelah kiri");
         });
         topBtnPanel.add(refreshBtn);
-        panel.add(topBtnPanel, BorderLayout.NORTH);
+        panel.add(topBtnPanel, BorderLayout.SOUTH);
 
         return panel;
     }

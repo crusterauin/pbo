@@ -65,8 +65,8 @@ public class PetugasDashboardUI extends JPanel {
         // Left Panel - Pasien List + Chat
         JPanel leftPanel = createLeftPanel();
         JTabbedPane leftTabbedPane = new JTabbedPane();
-        leftTabbedPane.addTab("📋 Data Pasien", leftPanel);
-        leftTabbedPane.addTab("💬 Chat", createChatPanel());
+        leftTabbedPane.addTab("Data Pasien", leftPanel);
+        leftTabbedPane.addTab("Chat", createChatPanel());
         splitPane.setLeftComponent(leftTabbedPane);
 
         // Right Panel - Form Kunjungan
@@ -94,7 +94,7 @@ public class PetugasDashboardUI extends JPanel {
         title.setFont(new Font("Arial", Font.BOLD, 30));
         title.setForeground(Color.WHITE);
 
-        JLabel userInfo = new JLabel("👤 " + currentUser.getNamaLengkap() + " | " +
+        JLabel userInfo = new JLabel(currentUser.getNamaLengkap() + " | " +
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         userInfo.setForeground(Color.WHITE);
 
@@ -106,7 +106,6 @@ public class PetugasDashboardUI extends JPanel {
 
     private JPanel createLeftPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 7));
-        panel.setBorder(BorderFactory.createTitledBorder("🔍 Data Pasien"));
         panel.setBackground(Color.WHITE);
 
         // Search
@@ -115,12 +114,12 @@ public class PetugasDashboardUI extends JPanel {
         searchField = new JTextField();
         searchField.addActionListener(e -> searchPasien());
 
-        JButton searchBtn = new JButton("🔍 Cari");
+        JButton searchBtn = new JButton("Cari");
         searchBtn.setBackground(new Color(52, 152, 219));
         searchBtn.setForeground(Color.WHITE);
         searchBtn.addActionListener(e -> searchPasien());
 
-        JButton newBtn = new JButton("➕ Pasien Baru");
+        JButton newBtn = new JButton("+ Pasien Baru");
         newBtn.setBackground(new Color(46, 204, 113));
         newBtn.setForeground(Color.WHITE);
         newBtn.addActionListener(e -> showFormPasienBaru());
@@ -165,7 +164,7 @@ public class PetugasDashboardUI extends JPanel {
 
     private JPanel createRightPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setBorder(BorderFactory.createTitledBorder("📝 Form Kunjungan"));
+        panel.setBorder(BorderFactory.createTitledBorder("Form Kunjungan"));
         panel.setBackground(Color.WHITE);
         panel.setPreferredSize(new Dimension(400, 0));
 
@@ -218,7 +217,7 @@ public class PetugasDashboardUI extends JPanel {
         btnPanel.setBackground(Color.WHITE);
 
         // Tombol Simpan Kunjungan
-        JButton simpanBtn = new JButton("💾 Simpan Kunjungan");
+        JButton simpanBtn = new JButton("Simpan Kunjungan");
         simpanBtn.setBackground(new Color(41, 128, 185));
         simpanBtn.setForeground(Color.WHITE);
         simpanBtn.addActionListener(e -> simpanKunjungan());
@@ -227,21 +226,21 @@ public class PetugasDashboardUI extends JPanel {
         // ============================================================
         // TOMBOL EDIT PASIEN (BARU)
         // ============================================================
-        JButton editBtn = new JButton("✏️ Edit Pasien");
+        JButton editBtn = new JButton("Edit Pasien");
         editBtn.setBackground(new Color(241, 196, 15));
         editBtn.setForeground(Color.WHITE);
         editBtn.addActionListener(e -> editPasien());
         editBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
         // Tombol Riwayat
-        JButton riwayatBtn = new JButton("📋 Riwayat");
+        JButton riwayatBtn = new JButton("Riwayat");
         riwayatBtn.setBackground(new Color(155, 89, 182));
         riwayatBtn.setForeground(Color.WHITE);
         riwayatBtn.addActionListener(e -> lihatRiwayat());
         riwayatBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
         // Tombol Reset
-        JButton resetBtn = new JButton("↺ Reset");
+        JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> resetForm());
 
         btnPanel.add(simpanBtn);

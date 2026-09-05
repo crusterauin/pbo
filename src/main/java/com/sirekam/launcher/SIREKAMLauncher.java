@@ -57,20 +57,20 @@ public class SIREKAMLauncher extends JFrame {
         cardPanel.setBackground(new Color(240, 244, 248));
 
         cardPanel.add(createRoleCard("PETUGAS", "Pendaftaran & Administrasi",
-                "Mendaftarkan pasien,\nmencatat keluhan, assign dokter",
+                "Mendaftarkan pasien, mencatat keluhan, melihat riwayat rekam medis, dan assign dokter",
                 new Color(52, 152, 219),
                 e -> openPetugasApp()
         ));
 
         cardPanel.add(createRoleCard("DOKTER", "Pelayanan Medis",
-                "Melihat pasien ditugaskan,\nmenulis resep, koordinasi",
+                "Melihat pasien ditugaskan, menulis resep, koordinasi dengan Petugas dan Apoteker",
                 new Color(46, 204, 113),
                 e -> openDokterApp()
         ));
 
         cardPanel.add(createRoleCard(
                 "APOTEKER", "Farmasi & Pembayaran",
-                "Mengelola obat, assign obat,\ndan cetak struk pembayaran",
+                "Mengelola obat, assign obat, dan cetak struk pembayaran",
                 new Color(155, 89, 182),
                 e -> openApotekerApp()
         ));
@@ -81,7 +81,7 @@ public class SIREKAMLauncher extends JFrame {
         JPanel footerPanel = new JPanel();
         footerPanel.setBackground(new Color(240, 244, 248));
         footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 15, 0));
-        JLabel footerLabel = new JLabel("© 2026 SIREKAM | Klinik Sehat Sejahtera | Generic + Design Pattern");
+        JLabel footerLabel = new JLabel("© 2026 SIREKAM | Klinik Stat Sehat");
         footerLabel.setFont(new Font("Arial", Font.PLAIN, 11));
         footerLabel.setForeground(Color.GRAY);
         footerPanel.add(footerLabel);

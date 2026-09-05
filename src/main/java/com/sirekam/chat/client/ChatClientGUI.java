@@ -62,7 +62,7 @@ public class ChatClientGUI extends JPanel {
         if (!chatClient.connect("127.0.0.1", 6789, user)) {
             useSocket = false;
             startPolling();
-            statusLabel.setText("🔴 Offline (polling)");
+            statusLabel.setText("Offline (polling)");
             statusLabel.setForeground(Color.RED);
         }
 
@@ -76,7 +76,6 @@ public class ChatClientGUI extends JPanel {
 
         // ============ TOP PANEL ============
         JPanel topPanel = new JPanel(new BorderLayout(5, 5));
-        topPanel.setBorder(BorderFactory.createTitledBorder("💬 Chat Settings"));
 
         // ============================================================
         // PANEL KIRI: Partner Name + Dropdown Dokter
@@ -111,7 +110,7 @@ public class ChatClientGUI extends JPanel {
         topPanel.add(leftTopPanel, BorderLayout.WEST);
 
         // Status
-        statusLabel = new JLabel("🟢 Online");
+        statusLabel = new JLabel("Online");
         statusLabel.setForeground(Color.GREEN);
         topPanel.add(statusLabel, BorderLayout.EAST);
 
@@ -134,12 +133,12 @@ public class ChatClientGUI extends JPanel {
         messageField = new JTextField();
         messageField.addActionListener(e -> sendMessage());
 
-        sendButton = new JButton("📤 Kirim");
+        sendButton = new JButton("Kirim");
         sendButton.setBackground(new Color(41, 128, 185));
         sendButton.setForeground(Color.WHITE);
         sendButton.addActionListener(e -> sendMessage());
 
-        JButton refreshBtn = new JButton("🔄 Refresh");
+        JButton refreshBtn = new JButton("Refresh");
         refreshBtn.addActionListener(e -> loadChatHistory());
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -249,9 +248,9 @@ public class ChatClientGUI extends JPanel {
         ));
         messagePanel.setMaximumSize(new Dimension(400, 100));
 
-        String senderName = isMine ? "👤 Saya" : "👤 " + message.getNamaPengirim();
-        if (senderName.equals("👤 null") || senderName.equals("👤 ")) {
-            senderName = "👤 User " + message.getIdPengirim();
+        String senderName = isMine ? "Saya" : message.getNamaPengirim();
+        if (senderName.equals("null") || senderName.equals("")) {
+            senderName = "User " + message.getIdPengirim();
         }
 
         JLabel senderLabel = new JLabel(senderName);
@@ -359,11 +358,11 @@ public class ChatClientGUI extends JPanel {
             try {
                 int unread = chatController.getJumlahPesanBaru(currentUser.getIdUser());
                 if (unread > 0) {
-                    statusLabel.setText("🔴 " + unread + " pesan baru");
+                    statusLabel.setText(unread + " pesan baru");
                     statusLabel.setForeground(Color.RED);
                     loadChatHistory();
                 } else {
-                    statusLabel.setText("🟢 Online (polling)");
+                    statusLabel.setText("Online (polling)");
                     statusLabel.setForeground(Color.GREEN);
                 }
             } catch (SQLException ex) {
@@ -404,11 +403,11 @@ public class ChatClientGUI extends JPanel {
             System.err.println("Error marking read: " + e.getMessage());
         }
 
-        statusLabel.setText("🔵 Pesan baru diterima");
+        statusLabel.setText("Pesan baru diterima");
         statusLabel.setForeground(new Color(52, 152, 219));
 
         Timer resetTimer = new Timer(3000, ev -> {
-            statusLabel.setText("🟢 Online");
+            statusLabel.setText("Online");
             statusLabel.setForeground(Color.GREEN);
         });
         resetTimer.setRepeats(false);
@@ -440,7 +439,7 @@ public class ChatClientGUI extends JPanel {
         ));
         messagePanel.setMaximumSize(new Dimension(400, 60));
 
-        JLabel senderLabel = new JLabel("🤖 Sistem");
+        JLabel senderLabel = new JLabel("Sistem");
         senderLabel.setFont(new Font("Arial", Font.BOLD, 11));
         senderLabel.setForeground(Color.GRAY);
         messagePanel.add(senderLabel, BorderLayout.NORTH);

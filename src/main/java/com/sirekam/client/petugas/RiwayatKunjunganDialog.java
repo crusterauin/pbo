@@ -154,7 +154,7 @@ public class RiwayatKunjunganDialog extends JDialog {
         closeBtn.setForeground(Color.WHITE);
         closeBtn.addActionListener(e -> dispose());
 
-        JButton refreshBtn = new JButton("🔄 Refresh");
+        JButton refreshBtn = new JButton("Refresh");
         refreshBtn.addActionListener(e -> loadRiwayat());
 
         bottomPanel.add(refreshBtn);
