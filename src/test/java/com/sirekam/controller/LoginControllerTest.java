@@ -34,10 +34,29 @@ public class LoginControllerTest {
 
     @Test
     @Order(2)
+    void testLoginDokter1Valid() {
+        System.out.println("TC-32: Login Dokter Valid");
+        try {
+            User user1 = controller.login("dr_grace", "password123");
+            assertNotNull(user1, "Login harus berhasil");
+            assertEquals("dokter", user1.getRole().getValue());
+            System.out.println("✅ Login Dokter1 successful: " + user1.getNamaLengkap());
+
+            User user2 = controller.login("dr_sovia", "password123");
+            assertNotNull(user2, "Login harus berhasil");
+            assertEquals("dokter", user2.getRole().getValue());
+            System.out.println("✅ Login Dokter2 successful: " + user2.getNamaLengkap());
+        } catch (SQLException e) {
+            fail("Error: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(3)
     void testLoginDokterValid() {
         System.out.println("TC-32: Login Dokter Valid");
         try {
-            User user = controller.login("dr_siti", "password123");
+            User user = controller.login("dr_grace", "password123");
             assertNotNull(user, "Login harus berhasil");
             assertEquals("dokter", user.getRole().getValue());
             System.out.println("✅ Login Dokter successful: " + user.getNamaLengkap());

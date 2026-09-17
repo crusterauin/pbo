@@ -50,7 +50,7 @@ public class FormEditPasienDialog extends JDialog {
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(52, 152, 219));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        JLabel headerLabel = new JLabel("✏️ Edit Data Pasien");
+        JLabel headerLabel = new JLabel("Edit Data Pasien");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
         headerLabel.setForeground(Color.WHITE);
         headerPanel.add(headerLabel);
