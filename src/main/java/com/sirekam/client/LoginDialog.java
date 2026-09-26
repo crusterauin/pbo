@@ -72,10 +72,12 @@ public class LoginDialog extends JDialog {
         JPanel side = new JPanel(new GridBagLayout());
         side.setBackground(Theme.BG);
 
+        boolean isAdmin = "Admin".equalsIgnoreCase(roleTitle);
+
         Theme.Card card = new Theme.Card(null);
         card.setLayout(new GridBagLayout());
         card.setBorder(Theme.pad(48, 52, 48, 52));
-        card.setPreferredSize(new Dimension(540, 630));
+        card.setPreferredSize(new Dimension(540, isAdmin ? 560 : 630));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -128,16 +130,19 @@ public class LoginDialog extends JDialog {
         cancelButton.setPreferredSize(new Dimension(200, 48));
         cancelButton.addActionListener(e -> closeDialog());
         gbc.gridy = 6;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(0, 0, isAdmin ? 0 : 10, 0);
         card.add(cancelButton, gbc);
 
-        hubungiAdminButton = Theme.outlineButton("💬 Hubungi Admin", new Color(0x25D366));
-        hubungiAdminButton.setFont(Theme.font(Font.BOLD, 14f));
-        hubungiAdminButton.setPreferredSize(new Dimension(200, 48));
-        hubungiAdminButton.addActionListener(e -> hubungiAdmin());
-        gbc.gridy = 7;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        card.add(hubungiAdminButton, gbc);
+        // Tombol "Hubungi Admin" hanya untuk login non-admin (Petugas/Dokter/Apoteker)
+        if (!isAdmin) {
+            hubungiAdminButton = Theme.outlineButton("💬 Hubungi Admin", new Color(0x25D366));
+            hubungiAdminButton.setFont(Theme.font(Font.BOLD, 14f));
+            hubungiAdminButton.setPreferredSize(new Dimension(200, 48));
+            hubungiAdminButton.addActionListener(e -> hubungiAdmin());
+            gbc.gridy = 7;
+            gbc.insets = new Insets(0, 0, 0, 0);
+            card.add(hubungiAdminButton, gbc);
+        }
 
         side.add(card);
         return side;
