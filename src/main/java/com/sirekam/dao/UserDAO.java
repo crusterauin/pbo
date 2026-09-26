@@ -28,6 +28,17 @@ public class UserDAO implements GenericDAO<User> {
         return result > 0;
     }
 
+    /** Simpan user baru dan kembalikan id_user yang baru dibuat (dipakai Admin saat menambah akun). */
+    public int saveAndGetId(User user) throws SQLException {
+        String sql = "INSERT INTO tb_user (username, password, nama_lengkap, role) VALUES (?, ?, ?, ?)";
+        return dbManager.executeUpdateWithGeneratedKey(sql,
+                user.getUsername(),
+                user.getPassword(),
+                user.getNamaLengkap(),
+                user.getRole().getValue()
+        );
+    }
+
     @Override
     public User findById(int id) throws SQLException {
         String sql = "SELECT * FROM tb_user WHERE id_user = ?";

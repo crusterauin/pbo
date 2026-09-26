@@ -10,20 +10,45 @@ import java.util.List;
 public class ObatDAO implements GenericDAO<Obat> {
 
     private DatabaseManager dbManager;
+    private final StokLogDAO stokLogDAO;
 
     public ObatDAO() {
         this.dbManager = DatabaseManager.getInstance();
+        this.stokLogDAO = new StokLogDAO();
     }
 
     @Override
     public boolean save(Obat obat) throws SQLException {
         String sql = "INSERT INTO tb_obat (nama_obat, satuan, stok, harga_satuan) VALUES (?, ?, ?, ?)";
-        int result = dbManager.executeUpdate(sql,
+        int idObat = dbManager.executeUpdateWithGeneratedKey(sql,
                 obat.getNamaObat(),
                 obat.getSatuan(),
                 obat.getStok(),
                 obat.getHargaSatuan()
         );
+        if (idObat > 0 && obat.getStok() > 0) {
+            stokLogDAO.catat(idObat, "masuk", obat.getStok(), "Stok awal - obat baru", null);
+        }
+        return idObat > 0;
+    }
+
+    /** Dipakai Admin untuk menambah stok obat yang sudah ada (barang masuk). */
+    public boolean tambahStok(int idObat, int jumlah, String keterangan, Integer idUser) throws SQLException {
+        String sql = "UPDATE tb_obat SET stok = stok + ? WHERE id_obat = ?";
+        int result = dbManager.executeUpdate(sql, jumlah, idObat);
+        if (result > 0) {
+            stokLogDAO.catat(idObat, "masuk", jumlah, keterangan, idUser);
+        }
+        return result > 0;
+    }
+
+    /** Dipakai Admin untuk mengurangi stok secara manual (mis. rusak/kadaluarsa). */
+    public boolean kurangiStokManual(int idObat, int jumlah, String keterangan, Integer idUser) throws SQLException {
+        String sql = "UPDATE tb_obat SET stok = stok - ? WHERE id_obat = ? AND stok >= ?";
+        int result = dbManager.executeUpdate(sql, jumlah, idObat, jumlah);
+        if (result > 0) {
+            stokLogDAO.catat(idObat, "keluar", jumlah, keterangan, idUser);
+        }
         return result > 0;
     }
 
@@ -83,6 +108,9 @@ public class ObatDAO implements GenericDAO<Obat> {
     public boolean updateStok(int idObat, int jumlah) throws SQLException {
         String sql = "UPDATE tb_obat SET stok = stok - ? WHERE id_obat = ? AND stok >= ?";
         int result = dbManager.executeUpdate(sql, jumlah, idObat, jumlah);
+        if (result > 0) {
+            stokLogDAO.catat(idObat, "keluar", jumlah, "Pemakaian resep (apoteker)", null);
+        }
         return result > 0;
     }
 

@@ -3,6 +3,7 @@ package com.sirekam.client.apoteker;
 import com.sirekam.client.LoginDialog;
 import com.sirekam.model.User;
 import com.sirekam.util.SwingUtils;
+import com.sirekam.util.Theme;
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,6 +12,7 @@ public class ApotekerApp extends JFrame {
     private ApotekerDashboardUI dashboard;
 
     public ApotekerApp() {
+        Theme.install();
         // ============================================================
         // TAMPILKAN LOGIN DULU
         // ============================================================
@@ -42,12 +44,9 @@ public class ApotekerApp extends JFrame {
         setSize(1100, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        try {
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Theme.install();
 
         dashboard = new ApotekerDashboardUI(currentUser);
         setContentPane(dashboard);

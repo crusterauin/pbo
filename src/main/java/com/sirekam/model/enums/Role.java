@@ -3,7 +3,8 @@ package com.sirekam.model.enums;
 public enum Role {
     PENDAFTARAN("pendaftaran"),
     DOKTER("dokter"),
-    APOTEKER("apoteker");
+    APOTEKER("apoteker"),
+    ADMIN("admin");
 
     private final String value;
 
@@ -29,6 +30,7 @@ public enum Role {
             case PENDAFTARAN -> "Petugas Pendaftaran";
             case DOKTER -> "Dokter";
             case APOTEKER -> "Apoteker";
+            case ADMIN -> "Admin";
         };
     }
 }

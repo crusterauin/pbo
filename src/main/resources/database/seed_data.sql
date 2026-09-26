@@ -9,7 +9,8 @@ INSERT INTO tb_user (username, password, nama_lengkap, role) VALUES
                                                                  ('petugas1', 'password123', 'Fatur', 'pendaftaran'),
                                                                  ('dr_grace', 'password123', 'dr. Grace, Sp.PD', 'dokter'),
                                                                  ('dr_sovia', 'password123', 'dr. Sovia, Sp.KJ', 'dokter'),
-                                                                 ('apoteker1', 'password123', 'apt. Maezar, S.Farm.', 'apoteker');
+                                                                 ('apoteker1', 'password123', 'apt. Maezar, S.Farm.', 'apoteker'),
+                                                                 ('admin', 'admin123', 'Administrator', 'admin');
 
 -- 2. Insert Dokter
 INSERT INTO tb_dokter (nama_dokter, spesialisasi, id_user) VALUES
@@ -25,6 +26,16 @@ INSERT INTO tb_obat (nama_obat, satuan, stok, harga_satuan) VALUES
                                                                 ('Antimo', 'tablet', 60, 12000),
                                                                 ('OBH', 'botol', 30, 25000),
                                                                 ('Proris', 'tablet', 90, 7000);
+
+-- 3b. Insert Log Stok Masuk awal (mengikuti stok awal tb_obat di atas)
+INSERT INTO tb_stok_log (id_obat, jenis, jumlah, keterangan, id_user) VALUES
+                                                                        (1, 'masuk', 100, 'Stok awal', 5),
+                                                                        (2, 'masuk', 50, 'Stok awal', 5),
+                                                                        (3, 'masuk', 75, 'Stok awal', 5),
+                                                                        (4, 'masuk', 200, 'Stok awal', 5),
+                                                                        (5, 'masuk', 60, 'Stok awal', 5),
+                                                                        (6, 'masuk', 30, 'Stok awal', 5),
+                                                                        (7, 'masuk', 90, 'Stok awal', 5);
 
 -- 4. Insert Contoh Pasien
 INSERT INTO tb_pasien (id_pasien, nama, tanggal_lahir, jenis_kelamin, alamat, no_hp, jenis_asuransi) VALUES

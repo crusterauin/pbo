@@ -1,8 +1,10 @@
 package com.sirekam.launcher;
 
+import com.sirekam.util.Theme;
 import com.sirekam.client.petugas.PetugasApp;
 import com.sirekam.client.dokter.DokterApp;
 import com.sirekam.client.apoteker.ApotekerApp;
+import com.sirekam.client.admin.AdminApp;
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,6 +13,7 @@ public class SIREKAMLauncher extends JFrame {
     private JFrame petugasFrame = null;
     private JFrame dokterFrame = null;
     private JFrame apotekerFrame = null;
+    private JFrame adminFrame = null;
 
     // Menyimpan referensi label pada setiap card agar ukuran font
     // dapat menyesuaikan (responsive) saat window di-maximize / di-resize
@@ -23,16 +26,12 @@ public class SIREKAMLauncher extends JFrame {
 
     public SIREKAMLauncher() {
         setTitle("SIREKAM - Sistem Informasi Rekam Medis");
-        setSize(800, 500);
+        setSize(950, 560);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        try {
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Theme.install();
 
         // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -52,7 +51,7 @@ public class SIREKAMLauncher extends JFrame {
         add(headerPanel, BorderLayout.NORTH);
 
         // Card Panel
-        JPanel cardPanel = new JPanel(new GridLayout(1, 3, 20, 20));
+        JPanel cardPanel = new JPanel(new GridLayout(1, 4, 20, 20));
         cardPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         cardPanel.setBackground(new Color(240, 244, 248));
 
@@ -73,6 +72,13 @@ public class SIREKAMLauncher extends JFrame {
                 "Mengelola obat, assign obat, dan cetak struk pembayaran",
                 new Color(155, 89, 182),
                 e -> openApotekerApp()
+        ));
+
+        cardPanel.add(createRoleCard(
+                "ADMIN", "Manajemen Sistem",
+                "Mengelola akun petugas/dokter/apoteker dan mengelola stok gudang obat",
+                new Color(230, 126, 34),
+                e -> openAdminApp()
         ));
 
         add(cardPanel, BorderLayout.CENTER);
@@ -264,6 +270,20 @@ public class SIREKAMLauncher extends JFrame {
             });
         } else {
             apotekerFrame.toFront();
+        }
+    }
+
+    private void openAdminApp() {
+        if (adminFrame == null || !adminFrame.isVisible()) {
+            adminFrame = new AdminApp();
+            adminFrame.setVisible(true);
+            adminFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    adminFrame = null;
+                }
+            });
+        } else {
+            adminFrame.toFront();
         }
     }
 

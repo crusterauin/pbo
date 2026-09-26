@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
                                        username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     nama_lengkap VARCHAR(100) NOT NULL,
-    role ENUM('pendaftaran', 'dokter', 'apoteker') NOT NULL,
+    role ENUM('pendaftaran', 'dokter', 'apoteker', 'admin') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;
 
@@ -93,7 +93,20 @@ CREATE TABLE IF NOT EXISTS tb_struk (
     FOREIGN KEY (id_resep) REFERENCES tb_resep(id_resep)
     ) ENGINE=InnoDB;
 
--- 9. Tabel Chat
+-- 9. Tabel Log Stok Obat (dikelola oleh Admin, dicatat otomatis saat stok masuk/keluar)
+CREATE TABLE IF NOT EXISTS tb_stok_log (
+                                           id_stok_log INT AUTO_INCREMENT PRIMARY KEY,
+                                           id_obat INT NOT NULL,
+                                           jenis ENUM('masuk', 'keluar') NOT NULL,
+    jumlah INT NOT NULL,
+    keterangan VARCHAR(255),
+    id_user INT NULL,
+    waktu DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_obat) REFERENCES tb_obat(id_obat) ON DELETE CASCADE,
+    FOREIGN KEY (id_user) REFERENCES tb_user(id_user) ON DELETE SET NULL
+    ) ENGINE=InnoDB;
+
+-- 10. Tabel Chat
 CREATE TABLE IF NOT EXISTS tb_chat (
                                        id_chat INT AUTO_INCREMENT PRIMARY KEY,
                                        jenis_chat ENUM('petugas_dokter', 'dokter_apoteker') NOT NULL,
