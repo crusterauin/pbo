@@ -3,6 +3,7 @@ package com.sirekam.client.petugas;
 import com.sirekam.client.LoginDialog;
 import com.sirekam.model.User;
 import com.sirekam.util.SwingUtils;
+import com.sirekam.util.Theme;
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,6 +12,7 @@ public class PetugasApp extends JFrame {
     private PetugasDashboardUI dashboard;
 
     public PetugasApp() {
+        Theme.install();
         LoginDialog loginDialog = new LoginDialog(this, "Petugas");
         loginDialog.setVisible(true);
 
@@ -36,12 +38,9 @@ public class PetugasApp extends JFrame {
         setSize(1100, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        try {
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Theme.install();
 
         dashboard = new PetugasDashboardUI(currentUser);
         setContentPane(dashboard);

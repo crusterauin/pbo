@@ -8,6 +8,7 @@ import com.sirekam.controller.KunjunganController;
 import com.sirekam.controller.ResepController;
 import com.sirekam.controller.DokterController;
 import com.sirekam.util.SwingUtils;
+import com.sirekam.util.Theme;
 import com.sirekam.pattern.iterator.KunjunganIterator;
 import com.sirekam.chat.client.ChatClientGUI;
 
@@ -57,60 +58,52 @@ public class DokterDashboardUI extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        setBackground(new Color(240, 244, 248));
+        setLayout(new BorderLayout(0, 14));
+        setBorder(BorderFactory.createEmptyBorder(16, 20, 12, 20));
+        setBackground(Theme.BG);
 
         // Header
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(46, 204, 113));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        JLabel title = new JLabel("Dashboard Dokter");
-        title.setFont(new Font("Arial", Font.BOLD, 18));
-        title.setForeground(Color.WHITE);
-        JLabel userInfo = new JLabel(currentUser.getNamaLengkap() + " | " +
-                LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        userInfo.setForeground(Color.WHITE);
-        headerPanel.add(title, BorderLayout.WEST);
-        headerPanel.add(userInfo, BorderLayout.EAST);
-        add(headerPanel, BorderLayout.NORTH);
+        add(Theme.header("Dashboard Dokter",
+                currentUser.getNamaLengkap() + " | " +
+                        LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                new Color(0x0B4F7A), Theme.INFO), BorderLayout.NORTH);
 
         // Main Split
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(400);
-        splitPane.setResizeWeight(0.4);
+        Theme.styleSplit(splitPane);
+        splitPane.setResizeWeight(0.5);
 
-        // ============================================================
         // LEFT PANEL - TABBED: Pasien + Chat Petugas + Chat Apoteker
-        // ============================================================
         JPanel leftPanel = createLeftPanel();
 
         JTabbedPane leftTabbedPane = new JTabbedPane();
+        Theme.styleTabs(leftTabbedPane);
         leftTabbedPane.addTab("Pasien Ditugaskan", leftPanel);
         leftTabbedPane.addTab("Chat Petugas", createChatPetugasPanel());
         leftTabbedPane.addTab("Chat Apoteker", createChatApotekerPanel());
 
-        splitPane.setLeftComponent(leftTabbedPane);
+        Theme.Card leftCard = new Theme.Card(null);
+        leftCard.setBorder(Theme.pad(8, 8, 8, 8));
+        leftCard.add(leftTabbedPane, BorderLayout.CENTER);
+        splitPane.setLeftComponent(leftCard);
 
         // Right Panel - Detail & Resep
-        JPanel rightPanel = createRightPanel();
-        splitPane.setRightComponent(rightPanel);
+        splitPane.setRightComponent(createRightPanel());
 
         add(splitPane, BorderLayout.CENTER);
+        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.5));
 
         // Footer
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        footerPanel.setBackground(new Color(240, 244, 248));
-        JLabel footerLabel = new JLabel("🔹 Design Pattern: Singleton, Strategy, Iterator | Generic Type");
-        footerLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        footerLabel.setForeground(Color.GRAY);
-        footerPanel.add(footerLabel);
-        add(footerPanel, BorderLayout.SOUTH);
+        JLabel footerLabel = new JLabel("SIREKAM", SwingConstants.CENTER);
+        footerLabel.setFont(Theme.font(Font.BOLD, 11f));
+        footerLabel.setForeground(Theme.MUTED);
+        add(footerLabel, BorderLayout.SOUTH);
     }
 
     private JPanel createLeftPanel() {
-        JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
+        JPanel leftPanel = new JPanel(new BorderLayout(0, 10));
         leftPanel.setBackground(Color.WHITE);
+        leftPanel.setBorder(Theme.pad(14, 6, 6, 6));
 
         String[] columns = {"No RM", "Nama", "Keluhan", "Status"};
         pasienTableModel = new DefaultTableModel(columns, 0) {
@@ -120,91 +113,100 @@ public class DokterDashboardUI extends JPanel {
             }
         };
         pasienTable = new JTable(pasienTableModel);
-        pasienTable.setRowHeight(30);
+        Theme.styleTable(pasienTable);
         pasienTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) selectPasien();
         });
         JScrollPane scrollPane = new JScrollPane(pasienTable);
+        Theme.styleScroll(scrollPane);
         leftPanel.add(scrollPane, BorderLayout.CENTER);
 
         statusLabel = new JLabel(" ");
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        leftPanel.add(statusLabel, BorderLayout.SOUTH);
+        Theme.styleStatus(statusLabel);
 
-        JButton refreshBtn = new JButton("Refresh");
+        JButton refreshBtn = Theme.outlineButton("Refresh", Theme.INFO);
         refreshBtn.addActionListener(e -> loadData());
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnPanel.add(refreshBtn);
-        leftPanel.add(btnPanel, BorderLayout.SOUTH);
+
+        JPanel bottom = new JPanel(new BorderLayout());
+        bottom.setOpaque(false);
+        bottom.add(statusLabel, BorderLayout.WEST);
+        bottom.add(refreshBtn, BorderLayout.EAST);
+        leftPanel.add(bottom, BorderLayout.SOUTH);
 
         return leftPanel;
     }
 
     private JPanel createRightPanel() {
-        JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("Detail Pasien & Resep"));
-        rightPanel.setBackground(Color.WHITE);
+        Theme.Card card = new Theme.Card("Detail Pasien & Resep");
 
         JPanel detailPanel = new JPanel(new GridBagLayout());
-        detailPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        detailPanel.setBackground(Color.WHITE);
+        detailPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(3, 5, 3, 5);
-
         gbc.gridx = 0;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
         gbc.gridy = 0;
-        detailPanel.add(new JLabel("Nama Pasien:"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 0;
+        gbc.insets = new Insets(4, 0, 6, 0);
+        detailPanel.add(Theme.caption("Nama Pasien:"), gbc);
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 16, 0);
         detailPasienArea = new JTextArea(1, 20);
-        detailPasienArea.setEditable(false);
-        detailPasienArea.setBackground(new Color(240, 240, 240));
+        Theme.styleReadOnly(detailPasienArea);
+        detailPasienArea.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.BORDER, 1, true), Theme.pad(9, 12, 9, 12)));
         detailPanel.add(detailPasienArea, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        detailPanel.add(new JLabel("Keluhan:"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        detailPanel.add(Theme.caption("Keluhan:"), gbc);
+
+        gbc.gridy = 3;
+        gbc.weighty = 0.3;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 16, 0);
         detailKeluhanArea = new JTextArea(3, 20);
-        detailKeluhanArea.setEditable(false);
-        detailKeluhanArea.setBackground(new Color(240, 240, 240));
-        detailKeluhanArea.setLineWrap(true);
-        detailKeluhanArea.setWrapStyleWord(true);
+        Theme.styleReadOnly(detailKeluhanArea);
         JScrollPane kelScroll = new JScrollPane(detailKeluhanArea);
+        Theme.styleScroll(kelScroll);
         detailPanel.add(kelScroll, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        detailPanel.add(new JLabel("Resep (Obat & Perlakuan):"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 4;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        detailPanel.add(Theme.caption("Resep (Obat & Perlakuan):"), gbc);
+
+        gbc.gridy = 5;
+        gbc.weighty = 0.7;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 20, 0);
         resepArea = new JTextArea(5, 20);
+        resepArea.setFont(Theme.font(Font.PLAIN, 14f));
         resepArea.setLineWrap(true);
         resepArea.setWrapStyleWord(true);
-        resepArea.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
         JScrollPane resepScroll = new JScrollPane(resepArea);
+        Theme.styleScroll(resepScroll);
         detailPanel.add(resepScroll, gbc);
 
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        btnPanel.setBackground(Color.WHITE);
-        JButton kirimBtn = new JButton("Kirim Resep ke Apoteker");
-        kirimBtn.setBackground(new Color(46, 204, 113));
-        kirimBtn.setForeground(Color.WHITE);
+        gbc.gridy = 6;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        JPanel btnPanel = new JPanel(new BorderLayout(10, 0));
+        btnPanel.setOpaque(false);
+        JButton kirimBtn = Theme.button("Kirim Resep ke Apoteker", Theme.SUCCESS);
         kirimBtn.addActionListener(e -> kirimResep());
-        kirimBtn.setFont(new Font("Arial", Font.BOLD, 12));
-        JButton resetBtn = new JButton("↺ Reset");
+        JButton resetBtn = Theme.outlineButton("↺ Reset", Theme.MUTED);
         resetBtn.addActionListener(e -> resetForm());
-        btnPanel.add(kirimBtn);
-        btnPanel.add(resetBtn);
+        btnPanel.add(kirimBtn, BorderLayout.CENTER);
+        btnPanel.add(resetBtn, BorderLayout.EAST);
         detailPanel.add(btnPanel, gbc);
 
-        rightPanel.add(detailPanel, BorderLayout.CENTER);
-
-        return rightPanel;
+        card.add(detailPanel, BorderLayout.CENTER);
+        return card;
     }
 
     // ============================================================

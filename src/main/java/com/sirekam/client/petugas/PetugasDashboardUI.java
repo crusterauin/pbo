@@ -8,6 +8,7 @@ import com.sirekam.controller.PasienController;
 import com.sirekam.controller.KunjunganController;
 import com.sirekam.controller.DokterController;
 import com.sirekam.util.SwingUtils;
+import com.sirekam.util.Theme;
 import com.sirekam.pattern.iterator.PasienIterator;
 import com.sirekam.chat.client.ChatClientGUI;
 
@@ -49,93 +50,76 @@ public class PetugasDashboardUI extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        setBackground(new Color(240, 244, 248));
+        setLayout(new BorderLayout(0, 14));
+        setBorder(BorderFactory.createEmptyBorder(16, 20, 12, 20));
+        setBackground(Theme.BG);
 
         // Header
-        JPanel headerPanel = createHeaderPanel();
-        add(headerPanel, BorderLayout.NORTH);
+        add(createHeaderPanel(), BorderLayout.NORTH);
 
         // Main Content - Split
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(500);
-        splitPane.setResizeWeight(0.5);
+        Theme.styleSplit(splitPane);
+        splitPane.setResizeWeight(0.58);
 
         // Left Panel - Pasien List + Chat
         JPanel leftPanel = createLeftPanel();
         JTabbedPane leftTabbedPane = new JTabbedPane();
+        Theme.styleTabs(leftTabbedPane);
         leftTabbedPane.addTab("Data Pasien", leftPanel);
         leftTabbedPane.addTab("Chat", createChatPanel());
-        splitPane.setLeftComponent(leftTabbedPane);
+        Theme.Card leftCard = new Theme.Card(null);
+        leftCard.setBorder(Theme.pad(8, 8, 8, 8));
+        leftCard.add(leftTabbedPane, BorderLayout.CENTER);
+        splitPane.setLeftComponent(leftCard);
 
         // Right Panel - Form Kunjungan
-        JPanel rightPanel = createRightPanel();
-        splitPane.setRightComponent(rightPanel);
+        splitPane.setRightComponent(createRightPanel());
 
         add(splitPane, BorderLayout.CENTER);
+        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.58));
 
         // Footer
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        footerPanel.setBackground(new Color(240, 244, 248));
-        JLabel footerLabel = new JLabel("🔹 Design Pattern: Singleton, Strategy, Iterator | Generic Type");
-        footerLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        footerLabel.setForeground(Color.GRAY);
-        footerPanel.add(footerLabel);
-        add(footerPanel, BorderLayout.SOUTH);
+        JLabel footerLabel = new JLabel("SIREKAM", SwingConstants.CENTER);
+        footerLabel.setFont(Theme.font(Font.BOLD, 11f));
+        footerLabel.setForeground(Theme.MUTED);
+        add(footerLabel, BorderLayout.SOUTH);
     }
 
     private JPanel createHeaderPanel() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(new Color(41, 128, 185));
-        header.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-
-        JLabel title = new JLabel("Dashboard Petugas");
-        title.setFont(new Font("Arial", Font.BOLD, 30));
-        title.setForeground(Color.WHITE);
-
-        JLabel userInfo = new JLabel(currentUser.getNamaLengkap() + " | " +
-                LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        userInfo.setForeground(Color.WHITE);
-
-        header.add(title, BorderLayout.WEST);
-        header.add(userInfo, BorderLayout.EAST);
-
-        return header;
+        return Theme.header("Dashboard Petugas",
+                currentUser.getNamaLengkap() + " | " +
+                        LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                Theme.PRIMARY_DARK, Theme.PRIMARY);
     }
 
     private JPanel createLeftPanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 7));
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
         panel.setBackground(Color.WHITE);
+        panel.setBorder(Theme.pad(14, 6, 6, 6));
 
         // Search
-        JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
-        searchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
+        searchPanel.setOpaque(false);
         searchField = new JTextField();
+        searchField.setFont(Theme.font(Font.PLAIN, 14f));
         searchField.addActionListener(e -> searchPasien());
 
-        JButton searchBtn = new JButton("Cari");
-        searchBtn.setBackground(new Color(52, 152, 219));
-        searchBtn.setForeground(Color.WHITE);
+        JButton searchBtn = Theme.button("Cari", Theme.PRIMARY);
         searchBtn.addActionListener(e -> searchPasien());
 
-        JButton newBtn = new JButton("+ Pasien Baru");
-        newBtn.setBackground(new Color(46, 204, 113));
-        newBtn.setForeground(Color.WHITE);
+        JButton newBtn = Theme.button("+ Pasien Baru", Theme.SUCCESS);
         newBtn.addActionListener(e -> showFormPasienBaru());
 
-        searchPanel.add(searchField, BorderLayout.CENTER);
-        searchPanel.add(searchBtn, BorderLayout.EAST);
-
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        btnPanel.setOpaque(false);
+        btnPanel.add(searchBtn);
         btnPanel.add(newBtn);
-        searchPanel.add(btnPanel, BorderLayout.SOUTH);
 
+        searchPanel.add(searchField, BorderLayout.CENTER);
+        searchPanel.add(btnPanel, BorderLayout.EAST);
         panel.add(searchPanel, BorderLayout.NORTH);
 
-        // ============================================================
-        // TABLE - TAMBAH KOLOM "Kunjungan Terakhir"
-        // ============================================================
         String[] columns = {"No RM", "Nama", "Tgl Lahir", "JK", "Asuransi", "No HP", "Kunjungan Terakhir"};
         pasienTableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -145,7 +129,8 @@ public class PetugasDashboardUI extends JPanel {
         };
 
         pasienTable = new JTable(pasienTableModel);
-        pasienTable.setRowHeight(30);
+        Theme.styleTable(pasienTable);
+        Theme.columnWidths(pasienTable, 80, 140, 100, 90, 100, 120, 170);
         pasienTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 selectPasien();
@@ -153,105 +138,86 @@ public class PetugasDashboardUI extends JPanel {
         });
 
         JScrollPane scrollPane = new JScrollPane(pasienTable);
+        Theme.styleScroll(scrollPane);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         statusLabel = new JLabel(" ");
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        Theme.styleStatus(statusLabel);
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
         panel.add(statusLabel, BorderLayout.SOUTH);
 
         return panel;
     }
 
     private JPanel createRightPanel() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setBorder(BorderFactory.createTitledBorder("Form Kunjungan"));
-        panel.setBackground(Color.WHITE);
-        panel.setPreferredSize(new Dimension(400, 0));
+        Theme.Card card = new Theme.Card("Form Kunjungan");
 
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        formPanel.setBackground(Color.WHITE);
+        formPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
-        gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        JLabel pasienInfoLabel = new JLabel("Pilih pasien dari daftar di sebelah kiri");
-        pasienInfoLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        pasienInfoLabel.setForeground(Color.GRAY);
-        formPanel.add(pasienInfoLabel, gbc);
-        gbc.gridwidth = 1;
+        gbc.insets = new Insets(4, 0, 18, 0);
+        formPanel.add(Theme.banner("Pilih pasien dari daftar di sebelah kiri"), gbc);
 
-        gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        formPanel.add(new JLabel("Keluhan Pasien:"), gbc);
+        gbc.insets = new Insets(0, 0, 6, 0);
+        formPanel.add(Theme.caption("Keluhan Pasien:"), gbc);
 
-        gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.gridwidth = 2;
+        gbc.weighty = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 18, 0);
         keluhanArea = new JTextArea(5, 30);
+        keluhanArea.setFont(Theme.font(Font.PLAIN, 14f));
         keluhanArea.setLineWrap(true);
         keluhanArea.setWrapStyleWord(true);
-        keluhanArea.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
         JScrollPane kelScroll = new JScrollPane(keluhanArea);
+        Theme.styleScroll(kelScroll);
         formPanel.add(kelScroll, gbc);
 
-        gbc.gridx = 0;
         gbc.gridy = 3;
-        gbc.gridwidth = 1;
-        formPanel.add(new JLabel("Assign ke Dokter:"), gbc);
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        formPanel.add(Theme.caption("Assign ke Dokter:"), gbc);
 
-        gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
+        gbc.insets = new Insets(0, 0, 24, 0);
         dokterCombo = new JComboBox<>();
-        dokterCombo.setPreferredSize(new Dimension(200, 30));
+        dokterCombo.setFont(Theme.font(Font.PLAIN, 14f));
+        dokterCombo.setPreferredSize(new Dimension(200, 40));
         formPanel.add(dokterCombo, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        btnPanel.setBackground(Color.WHITE);
+        gbc.gridy = 5;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        JPanel btnPanel = new JPanel(new GridLayout(1, 0, 10, 0));
+        btnPanel.setOpaque(false);
 
-        // Tombol Simpan Kunjungan
-        JButton simpanBtn = new JButton("Simpan Kunjungan");
-        simpanBtn.setBackground(new Color(41, 128, 185));
-        simpanBtn.setForeground(Color.WHITE);
+        JButton simpanBtn = Theme.button("Simpan Kunjungan", Theme.PRIMARY);
         simpanBtn.addActionListener(e -> simpanKunjungan());
-        simpanBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
-        // ============================================================
-        // TOMBOL EDIT PASIEN (BARU)
-        // ============================================================
-        JButton editBtn = new JButton("Edit Pasien");
-        editBtn.setBackground(new Color(241, 196, 15));
-        editBtn.setForeground(Color.WHITE);
+        JButton editBtn = Theme.button("Edit Pasien", Theme.WARNING);
         editBtn.addActionListener(e -> editPasien());
-        editBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
-        // Tombol Riwayat
-        JButton riwayatBtn = new JButton("Riwayat");
-        riwayatBtn.setBackground(new Color(155, 89, 182));
-        riwayatBtn.setForeground(Color.WHITE);
+        JButton riwayatBtn = Theme.button("Riwayat", Theme.INFO);
         riwayatBtn.addActionListener(e -> lihatRiwayat());
-        riwayatBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
-        // Tombol Reset
-        JButton resetBtn = new JButton("Reset");
+        JButton resetBtn = Theme.outlineButton("Reset", Theme.MUTED);
         resetBtn.addActionListener(e -> resetForm());
 
         btnPanel.add(simpanBtn);
-        btnPanel.add(editBtn);   // <-- TAMBAHKAN
+        btnPanel.add(editBtn);
         btnPanel.add(riwayatBtn);
         btnPanel.add(resetBtn);
         formPanel.add(btnPanel, gbc);
 
-        panel.add(formPanel, BorderLayout.CENTER);
-
-        return panel;
+        card.add(formPanel, BorderLayout.CENTER);
+        return card;
     }
 
     private JPanel createChatPanel() {

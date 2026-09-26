@@ -10,6 +10,7 @@ import com.sirekam.controller.KunjunganController;
 import com.sirekam.controller.PasienController;
 import com.sirekam.controller.DokterController;
 import com.sirekam.util.SwingUtils;
+import com.sirekam.util.Theme;
 import com.sirekam.pattern.iterator.ResepIterator;
 import com.sirekam.pattern.strategy.RegulerBiayaStrategy;
 import com.sirekam.pattern.strategy.BPJSBiayaStrategy;
@@ -66,56 +67,50 @@ public class ApotekerDashboardUI extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        setBackground(new Color(240, 244, 248));
+        setLayout(new BorderLayout(0, 14));
+        setBorder(BorderFactory.createEmptyBorder(16, 20, 12, 20));
+        setBackground(Theme.BG);
 
         // Header
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(155, 89, 182));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        JLabel title = new JLabel("Dashboard Apoteker");
-        title.setFont(new Font("Arial", Font.BOLD, 18));
-        title.setForeground(Color.WHITE);
-        JLabel userInfo = new JLabel(currentUser.getNamaLengkap() + " | " +
-                LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        userInfo.setForeground(Color.WHITE);
-        headerPanel.add(title, BorderLayout.WEST);
-        headerPanel.add(userInfo, BorderLayout.EAST);
-        add(headerPanel, BorderLayout.NORTH);
+        add(Theme.header("Dashboard Apoteker",
+                currentUser.getNamaLengkap() + " | " +
+                        LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                new Color(0x146B4E), Theme.SUCCESS), BorderLayout.NORTH);
 
         // Main Split
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(400);
-        splitPane.setResizeWeight(0.4);
+        Theme.styleSplit(splitPane);
+        splitPane.setResizeWeight(0.45);
 
         // Left Panel - Resep Masuk + Chat
         JPanel leftPanel = createLeftPanel();
         JTabbedPane leftTabbedPane = new JTabbedPane();
+        Theme.styleTabs(leftTabbedPane);
         leftTabbedPane.addTab("Resep Masuk", leftPanel);
         leftTabbedPane.addTab("Riwayat Transaksi", createRiwayatPanel());
         leftTabbedPane.addTab("Chat", createChatPanel());
-        splitPane.setLeftComponent(leftTabbedPane);
+        Theme.Card leftCard = new Theme.Card(null);
+        leftCard.setBorder(Theme.pad(8, 8, 8, 8));
+        leftCard.add(leftTabbedPane, BorderLayout.CENTER);
+        splitPane.setLeftComponent(leftCard);
 
         // Right Panel - Proses Resep
-        JPanel rightPanel = createRightPanel();
-        splitPane.setRightComponent(rightPanel);
+        splitPane.setRightComponent(createRightPanel());
 
         add(splitPane, BorderLayout.CENTER);
+        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.45));
 
         // Footer
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        footerPanel.setBackground(new Color(240, 244, 248));
-        JLabel footerLabel = new JLabel("🔹 Design Pattern: Singleton, Strategy, Iterator | Generic Type");
-        footerLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        footerLabel.setForeground(Color.GRAY);
-        footerPanel.add(footerLabel);
-        add(footerPanel, BorderLayout.SOUTH);
+        JLabel footerLabel = new JLabel("SIREKAM", SwingConstants.CENTER);
+        footerLabel.setFont(Theme.font(Font.BOLD, 11f));
+        footerLabel.setForeground(Theme.MUTED);
+        add(footerLabel, BorderLayout.SOUTH);
     }
 
     private JPanel createLeftPanel() {
-        JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
+        JPanel leftPanel = new JPanel(new BorderLayout(0, 10));
         leftPanel.setBackground(Color.WHITE);
+        leftPanel.setBorder(Theme.pad(14, 6, 6, 6));
 
         String[] columns = {"No Resep", "Pasien", "Dokter", "Status"};
         resepTableModel = new DefaultTableModel(columns, 0) {
@@ -125,68 +120,69 @@ public class ApotekerDashboardUI extends JPanel {
             }
         };
         resepTable = new JTable(resepTableModel);
-        resepTable.setRowHeight(30);
+        Theme.styleTable(resepTable);
         resepTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) selectResep();
         });
         JScrollPane scrollPane = new JScrollPane(resepTable);
+        Theme.styleScroll(scrollPane);
         leftPanel.add(scrollPane, BorderLayout.CENTER);
 
         statusLabel = new JLabel(" ");
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        leftPanel.add(statusLabel, BorderLayout.SOUTH);
+        Theme.styleStatus(statusLabel);
 
-        JButton refreshBtn = new JButton("Refresh");
+        JButton refreshBtn = Theme.outlineButton("Refresh", Theme.SUCCESS);
         refreshBtn.addActionListener(e -> {
             loadData();
             loadObat();
         });
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnPanel.add(refreshBtn);
-        leftPanel.add(btnPanel, BorderLayout.SOUTH);
+
+        JPanel bottom = new JPanel(new BorderLayout());
+        bottom.setOpaque(false);
+        bottom.add(statusLabel, BorderLayout.WEST);
+        bottom.add(refreshBtn, BorderLayout.EAST);
+        leftPanel.add(bottom, BorderLayout.SOUTH);
 
         return leftPanel;
     }
 
     private JPanel createRightPanel() {
-        JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("Proses Resep"));
-        rightPanel.setBackground(Color.WHITE);
+        Theme.Card card = new Theme.Card("Proses Resep");
 
         JPanel detailPanel = new JPanel(new GridBagLayout());
-        detailPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        detailPanel.setBackground(Color.WHITE);
+        detailPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(3, 5, 3, 5);
-
-        // ============================================================
-        // DETAIL RESEP (INFO)
-        // ============================================================
         gbc.gridx = 0;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // DETAIL RESEP (INFO)
         gbc.gridy = 0;
-        detailPanel.add(new JLabel("Detail Resep:"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 0;
+        gbc.insets = new Insets(4, 0, 6, 0);
+        detailPanel.add(Theme.caption("Detail Resep:"), gbc);
+
+        gbc.gridy = 1;
+        gbc.weighty = 0.28;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 14, 0);
         detailResepArea = new JTextArea(3, 20);
-        detailResepArea.setEditable(false);
-        detailResepArea.setBackground(new Color(240, 240, 240));
-        detailResepArea.setLineWrap(true);
-        detailResepArea.setWrapStyleWord(true);
+        Theme.styleReadOnly(detailResepArea);
         JScrollPane resepScroll = new JScrollPane(detailResepArea);
+        Theme.styleScroll(resepScroll);
         detailPanel.add(resepScroll, gbc);
 
-        // ============================================================
         // TABEL OBAT YANG SUDAH DIASSIGN
-        // ============================================================
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        detailPanel.add(new JLabel("Obat yang sudah diassign:"), gbc);
-
-        gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.gridwidth = 2;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        detailPanel.add(Theme.caption("Obat yang sudah diassign:"), gbc);
+
+        gbc.gridy = 3;
+        gbc.weighty = 0.72;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 14, 0);
         String[] detailColumns = {"ID", "Obat", "Jumlah", "Harga", "Subtotal"};
         detailTableModel = new DefaultTableModel(detailColumns, 0) {
             @Override
@@ -195,102 +191,103 @@ public class ApotekerDashboardUI extends JPanel {
             }
         };
         detailTable = new JTable(detailTableModel);
-        detailTable.setRowHeight(30);
-        detailTable.getColumnModel().getColumn(0).setMaxWidth(50);
-        detailTable.getColumnModel().getColumn(3).setMaxWidth(80);
-        detailTable.getColumnModel().getColumn(4).setMaxWidth(100);
+        Theme.styleTable(detailTable);
+        Theme.columnWidths(detailTable, 50, 300, 90, 130, 150);
+        detailTable.getColumnModel().getColumn(0).setMaxWidth(60);
+        detailTable.getColumnModel().getColumn(2).setMaxWidth(100);
+        detailTable.getColumnModel().getColumn(3).setMaxWidth(160);
+        detailTable.getColumnModel().getColumn(4).setMaxWidth(180);
         JScrollPane detailScroll = new JScrollPane(detailTable);
-        detailScroll.setPreferredSize(new Dimension(0, 120));
+        Theme.styleScroll(detailScroll);
+        detailScroll.setPreferredSize(new Dimension(0, 140));
         detailPanel.add(detailScroll, gbc);
 
-        // ============================================================
         // SUBTOTAL & TOTAL
-        // ============================================================
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 1;
-        detailPanel.add(new JLabel("Subtotal Obat:"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        subTotalLabel = new JLabel("Rp 0");
-        subTotalLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        subTotalLabel.setForeground(new Color(46, 204, 113));
-        detailPanel.add(subTotalLabel, gbc);
-
-        gbc.gridx = 0;
         gbc.gridy = 4;
-        totalKeseluruhanLabel = new JLabel("Total Bayar:");  // label
-        detailPanel.add(totalKeseluruhanLabel, gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        totalLabel = new JLabel("Rp 0");
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        totalLabel.setForeground(new Color(46, 204, 113));
-        detailPanel.add(totalLabel, gbc);
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 16, 0);
+        JPanel summary = new JPanel(new GridBagLayout());
+        summary.setBackground(new Color(0xF3F8F9));
+        summary.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.BORDER, 1, true), Theme.pad(10, 16, 10, 16)));
+        GridBagConstraints sg = new GridBagConstraints();
+        sg.fill = GridBagConstraints.HORIZONTAL;
+        sg.insets = new Insets(3, 0, 3, 0);
 
-        // ============================================================
+        sg.gridx = 0; sg.gridy = 0; sg.weightx = 1;
+        summary.add(Theme.caption("Subtotal Obat:"), sg);
+        subTotalLabel = new JLabel("Rp 0", SwingConstants.RIGHT);
+        subTotalLabel.setFont(Theme.font(Font.BOLD, 15f));
+        subTotalLabel.setForeground(Theme.PRIMARY);
+        sg.gridx = 1; sg.weightx = 0;
+        summary.add(subTotalLabel, sg);
+
+        totalKeseluruhanLabel = Theme.caption("Total Bayar:");
+        sg.gridx = 0; sg.gridy = 1; sg.weightx = 1;
+        summary.add(totalKeseluruhanLabel, sg);
+        totalLabel = new JLabel("Rp 0", SwingConstants.RIGHT);
+        totalLabel.setFont(Theme.font(Font.BOLD, 22f));
+        totalLabel.setForeground(Theme.SUCCESS);
+        sg.gridx = 1; sg.weightx = 0;
+        summary.add(totalLabel, sg);
+        detailPanel.add(summary, gbc);
+
         // FORM TAMBAH OBAT
-        // ============================================================
-        gbc.gridx = 0;
         gbc.gridy = 5;
-        gbc.gridwidth = 1;
-        detailPanel.add(new JLabel("Pilih Obat:"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 5;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        JPanel addForm = new JPanel(new GridBagLayout());
+        addForm.setOpaque(false);
+        GridBagConstraints ag = new GridBagConstraints();
+        ag.anchor = GridBagConstraints.WEST;
+        ag.fill = GridBagConstraints.HORIZONTAL;
+
+        ag.gridy = 0; ag.gridx = 0; ag.weightx = 1; ag.insets = new Insets(0, 0, 6, 10);
+        addForm.add(Theme.caption("Pilih Obat:"), ag);
+        ag.gridx = 1; ag.weightx = 0; ag.insets = new Insets(0, 0, 6, 10);
+        addForm.add(Theme.caption("Jumlah:"), ag);
+
         obatCombo = new JComboBox<>();
-        obatCombo.setPreferredSize(new Dimension(200, 30));
-        detailPanel.add(obatCombo, gbc);
+        obatCombo.setFont(Theme.font(Font.PLAIN, 14f));
+        obatCombo.setPreferredSize(new Dimension(200, 42));
+        ag.gridy = 1; ag.gridx = 0; ag.weightx = 1; ag.insets = new Insets(0, 0, 0, 10);
+        addForm.add(obatCombo, ag);
 
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        detailPanel.add(new JLabel("Jumlah:"), gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 6;
-        jumlahField = new JTextField(10);
-        detailPanel.add(jumlahField, gbc);
+        jumlahField = new JTextField(6);
+        jumlahField.setFont(Theme.font(Font.PLAIN, 14f));
+        jumlahField.setPreferredSize(new Dimension(110, 42));
+        ag.gridx = 1; ag.weightx = 0; ag.insets = new Insets(0, 0, 0, 10);
+        addForm.add(jumlahField, ag);
 
-        gbc.gridx = 1;
-        gbc.gridy = 7;
-        JButton assignBtn = new JButton(" Assign Obat");
-        assignBtn.setBackground(new Color(41, 128, 185));
-        assignBtn.setForeground(Color.WHITE);
+        JButton assignBtn = Theme.button("Assign Obat", Theme.PRIMARY);
+        assignBtn.setPreferredSize(new Dimension(140, 42));
         assignBtn.addActionListener(e -> assignObat());
-        detailPanel.add(assignBtn, gbc);
+        ag.gridx = 2; ag.insets = new Insets(0, 0, 0, 0);
+        addForm.add(assignBtn, ag);
+        detailPanel.add(addForm, gbc);
 
-        // ============================================================
-        // TOMBOL EDIT & DELETE
-        // ============================================================
-        gbc.gridx = 1;
-        gbc.gridy = 8;
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        btnPanel.setBackground(Color.WHITE);
+        // TOMBOL EDIT, HAPUS & CETAK
+        gbc.gridy = 6;
+        gbc.insets = new Insets(18, 0, 0, 0);
+        JPanel btnPanel = new JPanel(new GridLayout(1, 0, 10, 0));
+        btnPanel.setOpaque(false);
 
-        JButton editBtn = new JButton("Edit Jumlah");
-        editBtn.setBackground(new Color(241, 196, 15));
-        editBtn.setForeground(Color.WHITE);
+        JButton editBtn = Theme.button("Edit Jumlah", Theme.WARNING);
         editBtn.addActionListener(e -> editJumlah());
 
-        JButton deleteBtn = new JButton("Hapus");
-        deleteBtn.setBackground(new Color(231, 76, 60));
-        deleteBtn.setForeground(Color.WHITE);
+        JButton deleteBtn = Theme.button("Hapus", Theme.DANGER);
         deleteBtn.addActionListener(e -> hapusItem());
+
+        JButton cetakBtn = Theme.button("Cetak Struk", Theme.SUCCESS);
+        cetakBtn.addActionListener(e -> cetakStruk());
 
         btnPanel.add(editBtn);
         btnPanel.add(deleteBtn);
+        btnPanel.add(cetakBtn);
         detailPanel.add(btnPanel, gbc);
 
-        gbc.gridx = 1;
-        gbc.gridy = 10;
-        JButton cetakBtn = new JButton("Cetak Struk");
-        cetakBtn.setBackground(new Color(46, 204, 113));
-        cetakBtn.setForeground(Color.WHITE);
-        cetakBtn.addActionListener(e -> cetakStruk());
-        cetakBtn.setFont(new Font("Arial", Font.BOLD, 12));
-        detailPanel.add(cetakBtn, gbc);
-
-        rightPanel.add(detailPanel, BorderLayout.CENTER);
-
-        return rightPanel;
+        card.add(detailPanel, BorderLayout.CENTER);
+        return card;
     }
 
     private JPanel createChatPanel() {
@@ -578,6 +575,7 @@ public class ApotekerDashboardUI extends JPanel {
     private JPanel createRiwayatPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setBackground(Color.WHITE);
+        panel.setBorder(Theme.pad(10, 6, 6, 6));
 
         // ============================================================
         // SPLIT PANE: LEFT = DAFTAR OBAT, RIGHT = RINCIAN
@@ -585,23 +583,27 @@ public class ApotekerDashboardUI extends JPanel {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setDividerLocation(250);
         splitPane.setResizeWeight(0.3);
+        splitPane.setBorder(null);
+        splitPane.setDividerSize(12);
 
         // ============================================================
         // LEFT PANEL: DAFTAR OBAT (JLIST)
         // ============================================================
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
-        leftPanel.setBorder(BorderFactory.createTitledBorder("Daftar Obat Terjual"));
+        leftPanel.setBorder(Theme.titledBorder("Daftar Obat Terjual"));
         leftPanel.setBackground(Color.WHITE);
 
         DefaultListModel<String> listModel = new DefaultListModel<>();
         JList<String> obatList = new JList<>(listModel);
-        obatList.setFont(new Font("Arial", Font.PLAIN, 13));
+        Theme.styleList(obatList);
         obatList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JScrollPane listScroll = new JScrollPane(obatList);
+        Theme.styleScroll(listScroll);
         leftPanel.add(listScroll, BorderLayout.CENTER);
 
         JLabel totalObatLabel = new JLabel("Total: 0 obat");
+        Theme.styleStatus(totalObatLabel);
         totalObatLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         leftPanel.add(totalObatLabel, BorderLayout.SOUTH);
 
@@ -611,12 +613,13 @@ public class ApotekerDashboardUI extends JPanel {
         // RIGHT PANEL: RINCIAN TRANSAKSI
         // ============================================================
         JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("Rincian Transaksi"));
+        rightPanel.setBorder(Theme.titledBorder("Rincian Transaksi"));
         rightPanel.setBackground(Color.WHITE);
 
         // Label nama obat yang dipilih
         JLabel obatDipilihLabel = new JLabel("Pilih obat di sebelah kiri");
-        obatDipilihLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        obatDipilihLabel.setFont(Theme.font(Font.BOLD, 14f));
+        obatDipilihLabel.setForeground(Theme.PRIMARY_DARK);
         obatDipilihLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         rightPanel.add(obatDipilihLabel, BorderLayout.NORTH);
 
@@ -629,15 +632,17 @@ public class ApotekerDashboardUI extends JPanel {
             }
         };
         JTable rincianTable = new JTable(rincianTableModel);
-        rincianTable.setRowHeight(30);
+        Theme.styleTable(rincianTable);
         rincianTable.getColumnModel().getColumn(0).setMaxWidth(50);
         rincianTable.getColumnModel().getColumn(2).setMaxWidth(80);
 
         JScrollPane rincianScroll = new JScrollPane(rincianTable);
+        Theme.styleScroll(rincianScroll);
         rightPanel.add(rincianScroll, BorderLayout.CENTER);
 
         // Total transaksi label
         JLabel totalTransaksiLabel = new JLabel("Total: 0 transaksi");
+        Theme.styleStatus(totalTransaksiLabel);
         totalTransaksiLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         rightPanel.add(totalTransaksiLabel, BorderLayout.SOUTH);
 
@@ -701,7 +706,8 @@ public class ApotekerDashboardUI extends JPanel {
         // TOMBOL REFRESH
         // ============================================================
         JPanel topBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton refreshBtn = new JButton("Refresh");
+        topBtnPanel.setOpaque(false);
+        JButton refreshBtn = Theme.outlineButton("Refresh", Theme.SUCCESS);
         refreshBtn.addActionListener(ev -> {
             // Refresh daftar obat
             listModel.clear();

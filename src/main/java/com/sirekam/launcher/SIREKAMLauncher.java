@@ -1,5 +1,6 @@
 package com.sirekam.launcher;
 
+import com.sirekam.util.Theme;
 import com.sirekam.client.petugas.PetugasApp;
 import com.sirekam.client.dokter.DokterApp;
 import com.sirekam.client.apoteker.ApotekerApp;
@@ -28,11 +29,7 @@ public class SIREKAMLauncher extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        try {
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Theme.install();
 
         // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
